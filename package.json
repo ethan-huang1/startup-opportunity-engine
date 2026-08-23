@@ -4,6 +4,9 @@
   "description": "Evidence-backed startup opportunity discovery engine",
   "type": "module",
   "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "node --test tests/",
