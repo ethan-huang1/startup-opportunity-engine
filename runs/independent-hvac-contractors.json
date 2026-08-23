@@ -1,0 +1,144 @@
+{
+  "market": "independent HVAC contractors",
+  "generatedAt": "2026-08-04T17:02:20.465Z",
+  "windowDays": 30,
+  "weights": {
+    "frequency": 0.3,
+    "reach": 0.25,
+    "recency": 0.2,
+    "sourceDiversity": 0.15,
+    "severity": 0.1
+  },
+  "floor": {
+    "minDistinctVoices": 3,
+    "minSourceTypes": 2
+  },
+  "coverage": {
+    "verdict": "insufficient",
+    "totalInWindow": 2,
+    "contributingSources": 2,
+    "perSource": [
+      {
+        "source": "hackernews",
+        "label": "Hacker News",
+        "state": "no-results",
+        "degraded": false,
+        "itemsReturned": 0,
+        "itemsInWindow": 0,
+        "error": null
+      },
+      {
+        "source": "github",
+        "label": "GitHub",
+        "state": "ok",
+        "degraded": false,
+        "itemsReturned": 1,
+        "itemsInWindow": 1,
+        "error": null
+      },
+      {
+        "source": "reddit",
+        "label": "Reddit",
+        "state": "ok",
+        "degraded": false,
+        "itemsReturned": 1,
+        "itemsInWindow": 1,
+        "error": null
+      }
+    ],
+    "degradedSources": [],
+    "thresholds": {
+      "insufficientBelow": 15,
+      "adequateAtOrAbove": 40,
+      "minSources": 2
+    },
+    "explanation": "Only 2 in-window items across 2 sources. Reddit, Hacker News, and GitHub are developer- and tech-community-skewed, and the people in this market most likely do not discuss their problems there. Any opportunities ranked from this little evidence would describe the sources, not the market."
+  },
+  "dedupeStats": {
+    "url": 0,
+    "nearDuplicate": 0,
+    "crosspost": 0,
+    "syndication": 0,
+    "total": 2,
+    "unique": 2,
+    "duplicates": 0
+  },
+  "engagement": {
+    "github": {
+      "source": "github",
+      "label": "reactions",
+      "count": 1,
+      "normalized": false,
+      "min": 0,
+      "max": 0,
+      "median": 0,
+      "note": "Only 1 github items — too few for a meaningful percentile, so these are treated as neutral rather than ranked."
+    },
+    "reddit": {
+      "source": "reddit",
+      "label": "upvotes",
+      "count": 1,
+      "normalized": false,
+      "min": 0,
+      "max": 0,
+      "median": 0,
+      "note": "Only 1 reddit items — too few for a meaningful percentile, so these are treated as neutral rather than ranked."
+    }
+  },
+  "evidence": [
+    {
+      "id": "gh:issue:4830384446",
+      "source": "github",
+      "kind": "issue",
+      "title": "Pricing page truthfulness: photos sold as included (MMS is a $5 module), module ledger missing, voice denied",
+      "body": "**Severity:** P1 — fix before launch\n**Found by:** bughunt/bug-drift, ux-polish/ux-marketing, marketing/mkt-claims, marketing/mkt-strengths · confirmed by adversarial verifier\n\nFour auditors independently confirmed the pricing page contradicts the shipped #12 module model. Three distinct fixes on the same page: (1) stop advertising outbound photos as included in every plan — MMS is a $5/mo opt-in module hard-capped at 150/mo; (2) the \"That's the whole list\" cost ledger must list the $5/$8 module add-on prices; (3) stop denying voice — call forwarding + missed-call text-back ship as the $8 voice module.\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:84`\n\n**Evidence:** Pricing page lists \"Photos you send: count as 3 texts\" as a feature of BOTH plans (lines 84, 102) and the FAQ answers \"How do photo messages count?\" with \"Sending a photo counts as three texts from your allowance\" (line 256), with zero mention of the module. Same claim on apps/web/src/app/(marketing)/features/shared-inbox/page.tsx:236 (\"Loonext handles SMS and MMS to and from your business number\") and for/landscapers/page.tsx:158 (\"Photos in and out\"), and apps/web/public/llms.txt:16,29 (\"Sending a photo counts as three texts\", \"Photos both ways (MMS)\"). But the API hard-gates outbound MMS behind the opt-in $5/mo \"Picture messages\" module: apps/api/src/routes/compose.ts:349-354 throws 409 conflict (\"Sending pictures needs the Picture messages add-on\") when isModuleEnabled(db, companyId, \"mms\") is false, mirrored in apps/api/src/routes/messages.ts; the module costs 500 cents/mo and is capped at 150/mo (apps/api/src/billing/modules.ts:52-61, plans.ts:76-79). Only pre-migration companies are grandfathered (supabase/migrations/20260704160000_company_modules.sql:28-30) — every NEW signup the marketing site targets must buy the add-on.\n\n**Impact:** A new customer pays $29 expecting to text photos (the plumber/landscaper pages sell photo workflows as the core use case), then gets a 409 upsell on their first picture send. That is a false pricing claim on the page the site calls its transparency centerpiece — chargeback/refund fuel and a direct contradiction of the 'see the price, pay, start texting' positioning.\n\n**Recommended fix:** Either add the module lineup ($5 Picture messages / $8 Call forwarding / $5 Extra storage) to the pricing page and reword the plan cards to \"Photos you send (with the Picture messages add-on): count as 3 texts\", or fold outbound MMS into the base plans. Update shared-inbox, landscapers/plumbers/hvac trade pages, the pricing FAQ, and llms.txt in the same pass.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\nIndependently reproduced every leg of the finding. (1) Marketing claims: apps/web/src/app/(marketing)/pricing/page.tsx lists \"Photos you send: count as 3 texts\" in BOTH plan cards (lines 84, 102) and the FAQ answers \"How do photo messages count?\" with \"Sending a photo counts as three texts from your allowance\" (line 256); a grep for \"add-on|module|Picture messages\" across the whole pricing page returns zero matches — the module lineup is never disclosed. Same claims verified at apps/web/src/app/(marketing)/features/shared-inbox/page.tsx:236 (\"Loonext handles SMS and MMS to and from your business number\"), for/landscapers/page.tsx:158 (\"Photos in and out...\") and :165 (\"photos count as three\"), and apps/web/public/llms.txt:16,29. (2) API hard gate: apps/api/src/routes/compose.ts:349-354 throws a 409 (\"Sending pictures needs the Picture messages add-on — turn it on in Settings › Billing.\") when isModuleEnabled(db, companyId, \"mms\") is false; the check is commented as MANDATORY cost-protection. isModuleEnabled (apps/api/src/billing/company-modules.ts:17-33) returns true only when a company_modules row exists with disabled_at IS NULL. (3) New signups do NOT get MMS: supabase/migrations/20260704160000_company_modules.sql:28-30 seeds 'mms' only for companies existing at migration time (explicit GRANDFATHERING comment); the only enablement paths afterward are paid — Stripe checkout line items (apps/api/src/routes/billing.ts:184-198, enablement written on checkout.completed per apps/api/src/webhooks/stripe.ts:266-274) and the paid POST /v1/billing/modules toggle (billing.ts:461+). The onboarding plan builder defaults to zero modules selected (apps/web/src/app/onboarding/plan/page.tsx:86, useState<PlanModule[]>([]) with the comment \"opt-in add-ons carried into checkout\"). (4) Not an intentional documented exception: docs/DECISIONS.md and docs/PRICING-AUDIT.md document the #12 module model and cost gating but say nothing blessing the marketing pages' unqualified photo claims. So a new $29 customer who follows the pricing page's promise gets a 409 upsell on their first outbound photo — the impact as reported is real. P1 is appropriate (false pricing claim / refund risk, not a security or availability P0).\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:84`\n\n**Evidence:** Both plan cards state \"Photos you send: count as 3 texts\" (lines 84, 102) and the FAQ answers \"Sending a photo counts as three texts from your allowance\" (lines 255-256). The actual product gates MMS sending on the paid \"Picture messages\" module ($5/mo, apps/web/src/lib/api/types.ts:743-750): apps/api/src/routes/compose.ts:349 and routes/messages.ts:221 reject media when the module is off, apps/api/src/billing/plans.ts:76-79 caps it at 150 outbound MMS/month flat, and messaging/send.ts:350-351 strips media past the cap. Photos do NOT count as segments at all (send.ts:257-259: \"no MMS segment estimate, no photo segment count\"). The same stale copy also survives in-app at apps/web/src/app/(app)/settings/usage/page.tsx:453.\n\n**Impact:** A customer buys on the advertised \"photos = 3 texts\" model, then discovers photo sending is blocked entirely until they add a $5/mo module capped at 150 — a false advertising claim on the exact page whose brand promise is total price honesty, and a refund/chargeback/trust risk in week one.\n\n**Recommended fix:** Rewrite the two plan-card bullets and the photo FAQ to describe the real model: sending photos requires the Picture messages add-on, $5/mo with 150 included, incoming photos always free. Update settings/usage/page.tsx:453 to match.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\nPricing page still advertises \"Photos you send: count as 3 texts\" (apps/web/src/app/(marketing)/pricing/page.tsx:84,102) and FAQ \"counts as three texts\" (:256), plus in-app apps/web/src/app/(app)/settings/usage/page.tsx:453 — but the shipped product gates photo sending behind the opt-in $5/mo \"Picture messages\" module (apps/api/src/routes/compose.ts:349-354 throws 409 when module off; isModuleEnabled is default-off, apps/api/src/billing/company-modules.ts:17-33), caps it flat at 150/mo (apps/api/src/billing/plans.ts:76-79) with cap-and-drop media stripping (apps/api/src/messaging/send.ts:344-365), and photos no longer consume text segments (send.ts:257-259 \"no MMS segment estimate\"). Also apps/web/src/app/(marketing)/for/plumbers/page.tsx:190 (\"Photos count as three each\") has the same stale claim. docs/DECISIONS.md D5's \"MMS meters as 3 segments\" predates the #12 module model the code implements; no decision sanctions keeping the old copy. False-advertising/chargeback impact is real.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:84`\n\n**Evidence:** Both plan cards list \"Photos you send: count as 3 texts\" as an included feature (pricing/page.tsx:84 and :102), and the FAQ at :256 says \"Sending a photo counts as three texts\" with overage at 3¢. Shipped reality: MMS sending is gated behind the opt-in $5/mo \"Picture messages\" module (apps/api/src/routes/compose.ts:349 and routes/messages.ts:221 return 409 when the module is off; apps/api/src/billing/modules.ts:52-61 prices it at 500 cents), the onboarding plan builder defaults modules to [] (apps/web/src/app/onboarding/plan/page.tsx:86), and even with the module on, sends are hard-capped at 150 outbound MMS per period after which media is silently STRIPPED and the message goes out text-only (apps/api/src/messaging/send.ts:265-296 and :312-318, apps/api/src/billing/plans.ts:76-79). llms.txt:16/:29 and docs/marketing/COPY.md:450/:462 repeat the same stale claim.\n\n**Impact:** A buyer who signs up specifically to text job photos (the exact use case the trade pages sell) finds photo sending disabled unless they pay $5/mo more, and even then their 151st photo of the month silently degrades to text-only — a concrete false-advertising/refund-request generator on the page whose headline is \"Nothing hidden.\"\n\n**Recommended fix:** On the pricing page (and llms.txt + COPY.md §PR), move photo sending out of the base-plan feature lists and state it as the \"Picture messages\" add-on: $5/mo, 150 outbound picture messages included, receiving always free; disclose the cap-and-drop behavior in the photo FAQ.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\npricing/page.tsx:84,:102 list \"Photos you send: count as 3 texts\" as included base-plan features and FAQ :255-256 repeats it, with no mention anywhere on the page of the add-on, its $5/mo price, or the cap (grep for MMS/picture/add-on finds nothing else). Meanwhile compose.ts:349-354 409s picture sends unless the \"mms\" module is enabled (\"Sending pictures needs the Picture messages add-on\"), modules.ts:52-61 prices that module at 500 cents/mo, plans.ts:76-79 caps included outbound MMS at 150/period for both plans, and send.ts:265-296 + :312-318 strip media (text-only degrade) once over cap or with the module off. The module gating is the intentional #12 design (modules.ts header), so the marketing copy is the stale side — the mismatch and false-advertising impact are real.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:84`\n\n**Evidence:** Pricing page plan cards list \"Photos you send: count as 3 texts\" on both Starter (line 84) and Pro (line 102), and the FAQ says \"Sending a photo counts as three texts from your allowance\" (line 256) with no mention of the module. Same claim on /for/contractors (page.tsx:225 \"photos of progress count as three\") and /for/hvac (page.tsx:166), and in apps/web/public/llms.txt:16. Product truth: sending MMS requires the $5/mo \"Picture messages\" module (apps/api/src/billing/modules.ts:52-61 — gates: \"sending picture (MMS) messages\") and is hard-capped at 150/mo with cap-and-drop and no overage (apps/api/src/billing/plans.ts:59-79).\n\n**Impact:** A buyer who signs up expecting to text job photos on the $29 plan (the HVAC and contractor pages sell photo triage as a core workflow) hits a paywall in compose, discovers a $5/mo add-on and a 150/photo cap never disclosed anywhere on the marketing site — a false billing claim on the brand whose entire pitch is \"every cost, before you pay.\"\n\n**Recommended fix:** Update the plan-card line and FAQ on /pricing, the trade-page pricing blurbs, and llms.txt to the module truth: e.g. \"Add picture messaging for $5/mo — 150 photos a month included; each also counts as 3 texts. Receiving photos is always free.\" Keep the 3-text metering sentence only alongside the module disclosure.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\nMarketing copy sells base-plan photo sending (apps/web/src/app/(marketing)/pricing/page.tsx:84,102,256; for/contractors/page.tsx:225; for/hvac/page.tsx:166; public/llms.txt:16,29) with zero mention of the MMS module — grep of the pricing page for MMS/picture/module finds nothing. Product code gates sending behind the $5/mo mms module (apps/api/src/billing/modules.ts:52-61) with a 150/mo hard cap (apps/api/src/billing/plans.ts:76-79), enforced at the send choke point: apps/api/src/messaging/send.ts:272 returns over-cap when isModuleEnabled(db, companyId, \"mms\") is false and lines 344-350 strip media. No DECISIONS.md entry sanctions the discrepancy — DECISIONS.md:92 still describes the pre-module \"MMS meters as 3 segments\" model, predating commit 2b71ed7 that added the module gate; the marketing copy is stale, not intentional.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:189`\n\n**Evidence:** The honesty ledger closes with \"That's the whole list. No setup fees, no per-user fees...\" (lines 189-192) and the hero promises \"every cost on this page\" (line 302). The product now sells four opt-in modules the page never mentions: mms $5, voice $8, extra_storage $5, regions_ca $5 (apps/api/src/billing/modules.ts:23-89; card copy in apps/web/src/lib/api/types.ts:743-771; picked in onboarding at apps/web/src/app/onboarding/plan/page.tsx:86-123 and in-app at components/settings/plan-modules-card.tsx). The FAQ also answers \"Loonext... doesn't do voice calls\" (line 276) while the product sells an $8/mo call-forwarding + missed-call-text-back module (companies.ts:241 gates it) that no marketing page mentions.\n\n**Impact:** The anti-Podium positioning (every cost published, no surprises) is broken the moment a buyer reaches the in-app or onboarding plan builder and finds four monthly add-ons the pricing page said didn't exist; the voice FAQ also talks a buyer out of a feature the product actually sells.\n\n**Recommended fix:** Add a compact \"Add-ons\" strip to /pricing mirroring PLAN_MODULE_CARDS ($5 pictures/150, $8 call forwarding/300 min, $5 storage/10GB, $5 Canada numbers), amend the \"whole list\" ledger row to include them, and reword the voice FAQ to mention call forwarding + missed-call text-back.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\npricing/page.tsx:189-191 states \"That's the whole list\" and :276 \"doesn't do voice calls\", yet apps/api/src/billing/modules.ts:51-90 defines four paid opt-in modules (mms $5, voice $8, extra_storage $5, regions_ca $5) that buyers are shown and charged for via onboarding/plan/page.tsx:86-123,229-238 and components/settings/plan-modules-card.tsx (card copy in lib/api/types.ts:743-771). Grep of the entire (marketing) tree and marketing components finds zero mention of any module; docs/DECISIONS.md documents no decision to omit them (its only related line, \"No per-seat add-ons in MVP\" at line 90, is itself contradicted by the shipped #12 plan builder). No DB constraint, middleware, or documented decision makes the gap not real.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:189`\n\n**Evidence:** The honesty ledger's closing row (pricing/page.tsx:189-192) claims \"That's the whole list. No setup fees, no per-user fees...\" and the hero (:301-303) promises \"every cost on this page.\" But checkout's plan builder sells four paid add-ons the page never mentions: Picture messages $5/mo, Call forwarding $8/mo, Extra storage $5/mo (apps/web/src/lib/api/types.ts:743-770 PLAN_MODULE_CARDS, rendered by apps/web/src/app/onboarding/plan/page.tsx:227-229 and settings/plan-modules-card.tsx). No marketing page mentions any module (repo-wide grep of (marketing) for \"Picture messages\"/\"add-on\"/\"$5\" finds only competitor pricing).\n\n**Impact:** The trust centerpiece of the anti-Podium positioning (\"every cost, before you pay\") is factually incomplete the moment a buyer reaches /onboarding/plan and sees $5-$8/mo toggles that were never disclosed — exactly the hidden-fee pattern the page attacks competitors for.\n\n**Recommended fix:** Add an \"Optional add-ons\" block to the pricing page (and COPY.md §PR) listing the three visible modules with their prices and included quantities, and soften \"That's the whole list\" to cover base plans + these optional add-ons.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\nIndependently reproduced. The pricing page's honesty ledger claims completeness (\"That's the whole list. No setup fees, no per-user fees...\" — apps/web/src/app/(marketing)/pricing/page.tsx:189-192) and the hero promises \"every cost on this page\" (:301-303), yet the checkout plan builder sells paid add-ons never mentioned there: PLAN_MODULE_CARDS in apps/web/src/lib/api/types.ts:743-771 defines Picture messages $5/mo, Call forwarding $8/mo, Extra storage $5/mo (regions_ca $5 is filtered out as inert), and apps/web/src/app/onboarding/plan/page.tsx:218-269 renders the three toggles with \"{mod.price}/mo\" directly on the pre-checkout screen. A grep of apps/web/src/app/(marketing) for \"Picture messages|Call forwarding|Extra storage|add-on\" finds only competitor-pricing mentions — no Loonext add-on is disclosed on any marketing page. Not enforced/excused elsewhere: docs/DECISIONS.md has no entry deferring or intentionally omitting module disclosure from marketing (D4/Reviews removals are unrelated), and docs/PRICING-AUDIT.md (#12, \"COMPLETE\") documents shipping the plan builder with no marketing-copy follow-up. The staleness goes further than the auditor noted: the pricing FAQ still says Loonext \"doesn't do voice calls\" (page.tsx:276) while checkout sells a Call forwarding module, and the plan cards state \"Photos you send: count as 3 texts\" (:86, :102) with no mention that MMS is a $5/mo module — so the page is not merely incomplete but contradicts the shipped plan model. P1 severity is apt for a trust-positioning product pre-deploy.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:189`\n\n**Evidence:** The honesty ledger's closing item reads \"That's the whole list. No setup fees, no per-user fees, no monthly 'compliance' or 'carrier' line items\" (lines 189-192), enumerating plan price, $29 registration, overage, and tax only. The product also sells recurring monthly add-ons: mms $5/mo, voice $8/mo, extra_storage $5/mo (apps/api/src/billing/modules.ts:51-90), which onboarding offers before first payment (apps/web/src/app/onboarding/plan/page.tsx:229).\n\n**Impact:** The trust centerpiece of the whole site makes an exhaustiveness claim that a buyer can falsify five minutes later at the onboarding plan step, where three optional monthly line items appear — the exact 'gotcha' pattern the page attacks competitors for.\n\n**Recommended fix:** Add a ledger row: \"Optional add-ons — picture messages $5/mo, call forwarding $8/mo, extra storage $5/mo. Off by default; you turn them on, you can turn them off.\" Keep \"that's the whole list\" as the row after it.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\napps/web/src/app/(marketing)/pricing/page.tsx:168-193 — the LEDGER array lists only plan/$29 registration/extra texts/tax and closes with \"That's the whole list… no monthly 'compliance' or 'carrier' line items\"; no add-on row exists and grep finds no add-on/module mention anywhere in pricing/page.tsx. Meanwhile apps/api/src/billing/modules.ts:51-90 defines recurring monthly add-ons (mms 500¢, voice 800¢, extra_storage 500¢, regions_ca 500¢) with Stripe licensed prices, and apps/web/src/app/onboarding/plan/page.tsx:218-263 renders them as an \"Add-ons\" section with \"{mod.price}/mo\" rows that ride into checkout (line 123) before first payment. docs/DECISIONS.md has no decision sanctioning the omission — line 90's \"No per-seat add-ons in MVP\" is about seats, not modules; D4 concerns the footer. The add-ons are opt-in/off-by-default, which mitigates but does not refute the exhaustiveness claim being false.\n\n</details>\n\n---\n\n**Where:** `apps/web/src/app/(marketing)/pricing/page.tsx:276`\n\n**Evidence:** Pricing FAQ: \"it doesn't do voice calls\" (line 276). /compare/quo repeats it categorically: \"Loonext can't call anyone\" (page.tsx:248) and \"Not included. Loonext can't make calls\" (page.tsx:92). Product truth: the $8/mo voice module forwards calls from the business number to a cell with 300 min/mo included (apps/api/src/billing/modules.ts:62-71), and missed-call text-back is a shipped settings feature (apps/web/src/app/(app)/settings/missed-calls/page.tsx:98 \"Text back a missed call\").\n\n**Impact:** Missed-call text-back is the feature Podium built its category on and a top objection for this ICP (\"what happens when they call the texting number?\"); the site answers \"nothing,\" conceding buyers to Quo unnecessarily and contradicting what onboarding then sells them. It's true Loonext can't place calls, but 'can't call anyone / doesn't do voice' overstates the gap.\n\n**Recommended fix:** Reword to the precise truth everywhere voice is denied: \"Loonext doesn't make calls — but calls to your number forward to your cell (optional $8/mo, 300 minutes), and missed calls get an automatic text-back so the lead lands in your inbox.\" Add missed-call text-back to the compare/quo voice row and consider a homepage feature-card mention.\n\n<details><summary>Adversarial verification (confirmed)</summary>\n\nMarketing denials verified verbatim: pricing/page.tsx:276 \"doesn't do voice calls\"; compare/quo/page.tsx:92 \"Loonext can't make calls\", :248 \"Loonext can't call anyone\", :363 \"cannot place or receive a call\" (the last is flatly false). Product ships the contradicting features: apps/api/src/billing/modules.ts:61-70 voice module (\"Forward calls from your business number to your cell, and text back the ones you miss\", 800 cents/mo) with 300 min/mo (apps/api/src/billing/plans.ts:53-56), and the missed-call text-back settings page at apps/web/src/app/(app)/settings/missed-calls/page.tsx:98. docs/DECISIONS.md D26 (line 747) documents the shipped voice wave; no decision marks the marketing denial as intentional, and grep confirms neither marketing page mentions forwarding/modules/$8 anywhere. Repo convention (DECISIONS.md line 415) is to flip marketing copy when capability ships, which was not done here.\n\n</details>\n\n_Filed by the `loonext-launch-audit` agent team (run `wf_241dc0ca-b6d`, 2026-07-07)._",
+      "url": "https://github.com/BytechLabs/Texturion/issues/24",
+      "author": "416rehman",
+      "voiceId": "github:user:416rehman",
+      "container": "BytechLabs/Texturion",
+      "publishedAt": "2026-07-07",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 1
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4830384446",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions",
+      "engagementPercentile": null
+    },
+    {
+      "id": "reddit:post:R1",
+      "source": "reddit",
+      "kind": "post",
+      "title": "Do HVAC Contractors need jobs?",
+      "body": "Do HVAC Contractors need jobs?\nEdit: I apologize I realize this is pretty confusing outside of my bubble essentially I’m asking if hvac owners and independent contractors are in need of leads or due to the the shortage of hvac contractors is there more than enough to go around So I&#39;m an automation specialist. I&#39;ve created what I think are pretty good services to offer to HVAC guys, but the response has been pretty rough. I’ve only been met with &quot;not interested&quot; and &quot;I have enough jobs already.&quot; I u",
+      "url": "https://reddit.com/r/hvacpeople/comments/1vcz88m/do_hvac_contractors_need_jobs",
+      "author": null,
+      "voiceId": "reddit:item:https://reddit.com/r/hvacpeople/comments/1vcz88m/do_hvac_contractors_need_jobs",
+      "container": "r/hvacpeople",
+      "publishedAt": "2026-08-01",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 17
+      },
+      "parentId": null,
+      "threadId": "reddit:post:R1",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 upvotes",
+      "engagementPercentile": null
+    }
+  ],
+  "halted": true,
+  "haltReason": "insufficient-evidence",
+  "opportunities": [],
+  "weakSignals": [],
+  "extraction": null,
+  "elapsedMs": 8469
+}

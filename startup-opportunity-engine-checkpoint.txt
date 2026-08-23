@@ -1,0 +1,22 @@
+╭─── Claude Code v2.1.221 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│              Welcome back Ethan Huang!             │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+│                        ▘▘ ▝▝                       │ [VSCode] Added Focus v… │
+│   Sonnet 5 · Claude Pro · ehuang547@gmail.com's    │ Added `mode: "mask"` f… │
+│   Organization                                     │ Added warnings to `cla… │
+│       ~/Downloads/startup-opportunity-engine       │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+❯ /model                                                                        
+  ⎿  Set model to Sonnet 5 and saved as your default for new sessions with high
+     effort
+
+❯ /export                                                                       
+  ⎿  Export cancelled
+
+❯ /teleport 
+  ⎿  Teleport cancelled

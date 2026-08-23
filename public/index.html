@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evidence-Backed Startup Opportunity Engine</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="masthead">
+    <div class="shell">
+      <div class="account-bar" id="account-bar" hidden>
+        <span id="account-email"></span>
+        <button type="button" id="sign-out-button" class="link-button">Sign out</button>
+      </div>
+
+      <p class="eyebrow">Evidence first</p>
+      <h1>Startup Opportunity Engine</h1>
+      <p class="lede">
+        Enter a market or customer group. This searches recent public discussions,
+        extracts the problems people actually describe, groups them, and ranks them
+        by how well the evidence supports them — with every conclusion traceable
+        back to the post it came from.
+      </p>
+
+      <div id="search-panel" hidden>
+        <form id="search-form" class="search">
+          <label class="visually-hidden" for="market">Market or customer group</label>
+          <input
+            id="market"
+            name="market"
+            type="text"
+            placeholder="e.g. self-hosted note taking apps"
+            autocomplete="off"
+            required
+            minlength="3"
+            maxlength="200">
+          <button type="submit" id="run-button">Research</button>
+        </form>
+
+        <p class="search-hint">
+          Searches Reddit, Hacker News, and GitHub issues from the last 30 days.
+          A run takes 1–3 minutes.
+        </p>
+      </div>
+
+      <form id="auth-form" class="auth-form" hidden>
+        <label class="visually-hidden" for="auth-name">Name</label>
+        <input id="auth-name" name="name" type="text" placeholder="Name" autocomplete="name" hidden>
+        <label class="visually-hidden" for="auth-email">Email</label>
+        <input id="auth-email" name="email" type="email" placeholder="Email" autocomplete="email" required>
+        <label class="visually-hidden" for="auth-password">Password</label>
+        <input id="auth-password" name="password" type="password" placeholder="Password" autocomplete="current-password" required minlength="8">
+        <div class="auth-actions">
+          <button type="submit" id="sign-in-button">Sign in</button>
+          <button type="button" id="sign-up-button" class="link-button">Create an account instead</button>
+        </div>
+        <p id="auth-error" class="error" role="alert" hidden></p>
+      </form>
+    </div>
+  </header>
+
+  <main id="main" class="shell" hidden>
+    <!-- Always visible, on every run, not only on failures. -->
+    <section class="disclosure" aria-labelledby="bias-heading">
+      <h2 id="bias-heading">What these sources can and cannot tell you</h2>
+      <p>
+        Reddit, Hacker News, and GitHub are heavily weighted toward developers,
+        tech workers, and early adopters. They are a good window into software
+        and technical tooling, and a poor one into most other markets — trades,
+        healthcare, logistics, hospitality, professional services. If the people
+        in your market do not post there, this tool will tell you it found too
+        little rather than invent something.
+      </p>
+    </section>
+
+    <div id="status" class="status" hidden aria-live="polite"></div>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <div id="results" hidden>
+      <!-- Shown only when the run itself did not complete cleanly. Keeps
+           "we could not look" visually distinct from "we looked and found little". -->
+      <section id="analysis-banner" class="analysis-banner" role="status" hidden>
+        <h2 id="analysis-headline"></h2>
+        <p id="analysis-explanation"></p>
+        <ul id="analysis-steps" class="analysis-steps"></ul>
+      </section>
+
+      <section id="coverage-panel" class="panel" aria-labelledby="coverage-heading">
+        <h2 id="coverage-heading">Coverage</h2>
+        <div id="coverage-body"></div>
+      </section>
+
+      <div class="controls" id="controls" hidden>
+        <div class="control-group">
+          <label class="toggle">
+            <input type="checkbox" id="hide-inference">
+            <span>Hide AI inference</span>
+          </label>
+          <p class="control-note">
+            Collapses everything written by the model, leaving only verbatim
+            quotes and computed numbers.
+          </p>
+        </div>
+        <details class="weights" id="weights-panel">
+          <summary>Adjust scoring weights</summary>
+          <p class="control-note">
+            These weights are an editorial judgment, not a validated model.
+            Changing them re-ranks instantly. If the order moves a lot, that
+            tells you the ranking was never firm.
+          </p>
+          <div id="weight-sliders"></div>
+          <button type="button" id="reset-weights" class="link-button">Reset to defaults</button>
+        </details>
+      </div>
+
+      <section id="opportunities-section" class="panel" aria-labelledby="opportunities-heading" hidden>
+        <h2 id="opportunities-heading">Ranked by evidence strength</h2>
+        <details class="score-explainer">
+          <summary>What this score is, and what it is not</summary>
+          <div class="explainer-body">
+            <p>
+              <strong>Evidence Strength measures one thing:</strong> how well
+              supported a problem is by the sources searched — how many distinct
+              people raised it, how much the community engaged, how recently, and
+              across how many different sources.
+            </p>
+            <p>
+              <strong>It is not a prediction that a business will succeed.</strong>
+              It knows nothing about market size, willingness to pay, competition,
+              technical feasibility, regulation, timing, or whether you are the
+              right person to build it. A high score means "people really are
+              saying this", not "this is a good idea".
+            </p>
+          </div>
+        </details>
+        <div id="opportunities"></div>
+      </section>
+
+      <section id="weak-section" class="panel" aria-labelledby="weak-heading" hidden>
+        <h2 id="weak-heading">Weak signals — insufficient evidence</h2>
+        <p class="panel-note">
+          These problems appeared, but did not clear the floor of
+          <strong id="floor-text"></strong>. They are shown because they are real,
+          and hidden from the ranking because there is not enough behind them to
+          rank honestly.
+        </p>
+        <details id="weak-details">
+          <summary id="weak-summary">Show weak signals</summary>
+          <div id="weak-signals"></div>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="evidence-heading">
+        <h2 id="evidence-heading">Evidence explorer</h2>
+        <p class="panel-note" id="evidence-summary"></p>
+        <div class="filters" id="evidence-filters"></div>
+        <div id="evidence-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="shell">
+    <p>
+      Runs are cached locally. Nothing is uploaded. Sources are searched over a
+      30-day window.
+    </p>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

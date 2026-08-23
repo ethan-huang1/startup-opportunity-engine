@@ -1,0 +1,2884 @@
+{
+  "market": "note taking apps",
+  "generatedAt": "2026-08-04T16:49:55.128Z",
+  "windowDays": 30,
+  "weights": {
+    "frequency": 0.3,
+    "reach": 0.25,
+    "recency": 0.2,
+    "sourceDiversity": 0.15,
+    "severity": 0.1
+  },
+  "floor": {
+    "minDistinctVoices": 3,
+    "minSourceTypes": 2
+  },
+  "coverage": {
+    "verdict": "adequate",
+    "totalInWindow": 70,
+    "contributingSources": 3,
+    "perSource": [
+      {
+        "source": "hackernews",
+        "label": "Hacker News",
+        "state": "ok",
+        "degraded": false,
+        "itemsReturned": 52,
+        "itemsInWindow": 52,
+        "error": null
+      },
+      {
+        "source": "github",
+        "label": "GitHub",
+        "state": "ok",
+        "degraded": false,
+        "itemsReturned": 14,
+        "itemsInWindow": 14,
+        "error": null
+      },
+      {
+        "source": "reddit",
+        "label": "Reddit",
+        "state": "ok",
+        "degraded": false,
+        "itemsReturned": 4,
+        "itemsInWindow": 4,
+        "error": null
+      }
+    ],
+    "degradedSources": [],
+    "thresholds": {
+      "insufficientBelow": 15,
+      "adequateAtOrAbove": 40,
+      "minSources": 2
+    },
+    "explanation": "70 in-window items across 3 sources."
+  },
+  "dedupeStats": {
+    "url": 0,
+    "nearDuplicate": 0,
+    "crosspost": 0,
+    "syndication": 0,
+    "total": 71,
+    "unique": 71,
+    "duplicates": 0
+  },
+  "engagement": {
+    "hackernews": {
+      "source": "hackernews",
+      "label": "points",
+      "count": 52,
+      "normalized": true,
+      "min": 0,
+      "max": 219,
+      "median": 0,
+      "note": "Percentiles computed within the 52 hackernews items collected in this run."
+    },
+    "github": {
+      "source": "github",
+      "label": "reactions",
+      "count": 14,
+      "normalized": true,
+      "min": 0,
+      "max": 2,
+      "median": 0,
+      "note": "Percentiles computed within the 14 github items collected in this run."
+    },
+    "reddit": {
+      "source": "reddit",
+      "label": "upvotes",
+      "count": 4,
+      "normalized": false,
+      "min": 2,
+      "max": 31,
+      "median": 26,
+      "note": "Only 4 reddit items — too few for a meaningful percentile, so these are treated as neutral rather than ranked."
+    }
+  },
+  "evidence": [
+    {
+      "id": "gh:issue:4811396724",
+      "source": "github",
+      "kind": "issue",
+      "title": "Research workspace/project models in writing, note-taking, and IDE tools",
+      "body": "## Purpose\n\nDocument lessons from writing apps, note-taking systems, IDE workspace models, and document/project formats to guide TRURL's workspace model and writer-first UX.\n\nThis issue is grounded in the local research document created at:\n\n`docs/research/workspace-and-writing-tools-review.md`\n\n## Scope\n\nCompare references such as:\n\n- Scrivener\n- Ulysses\n- Manuskript\n- novelWriter\n- Zettlr\n- iA Writer\n- Typora\n- MarkText\n- Quarto\n- Obsidian\n- Logseq\n- Dendron\n- Foam\n- VS Code multi-root workspaces\n- JetBrains project/module model\n- GitBook / BookStack\n- Pandoc defaults files\n- TextBundle / TextPack\n\n## Questions\n\n- How does each tool represent a project or workspace?\n- Does it use open folders, a database, or a proprietary package?\n- How does it represent chapters, scenes, research, notes, assets, and exports?\n- How does it handle metadata?\n- How does it handle versions, snapshots, history, or Git?\n- How approachable is it for non-technical writers?\n- What should TRURL learn from it?\n- What should TRURL avoid?\n\n## Acceptance criteria\n\n- [ ] Research document exists under `docs/research/`.\n- [ ] Includes comparison matrix.\n- [ ] Includes direct TRURL design lessons.\n- [ ] Includes workspace manifest lessons.\n- [ ] Includes writer-first UX recommendations.\n- [ ] Includes risks and anti-patterns.\n- [ ] Includes recommended follow-up issues.\n\n## Product principle\n\nTRURL should be writer-first on the surface and Git-aware underneath: hide operational complexity, not editorial truth.",
+      "url": "https://github.com/sigilabcodex/TRURL/issues/7",
+      "author": "sigilabcodex",
+      "voiceId": "github:user:sigilabcodex",
+      "container": "sigilabcodex/TRURL",
+      "publishedAt": "2026-07-05",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4811396724",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": false,
+      "engagementText": "0 reactions · 50th percentile of github items in this run",
+      "engagementPercentile": 0.5
+    },
+    {
+      "id": "hn:story:48819808",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: Rowboat – Open-source, local-first alternative to Claude Desktop",
+      "body": "Claude’s desktop app is brilliant, but for our own daily work we kept wanting it to be less like a chat app and more like a full-fledged work app. Rowboat is our attempt at that, including the ability to build your own work surfaces inside Rowboat (more below).\nOur repo is https://github.com/rowboatlabs/rowboat, and there’s a demo video here: https://www.youtube.com/watch?v=et5yQABJ3xI\nIn a previous startup, we built a deep-learning product for enterprise support reps, including teams supporting P&G brands. Models took live notes, suggested replies, and recommended actions while support reps were on calls or handling emails. One lesson stuck with us: it's not enough for the AI to be right, the help has to show up where the work is happening.\nSo we added what we came to call “work surfaces”: dedicated areas for email, meetings, notes, browser, and parallel coding, where the assistant can help inside the workflow itself rather than only through chat:\n- Email client: Rowboat has a simple email client that sorts incoming emails into important vs. everything else, and pre-creates drafts for important emails. As you edit and send emails, it takes notes on your style, so future drafts get closer to your voice.\n- Meeting notes: We built a Granola-style local meeting notetaker. Notes are stored as plain Markdown files on your machine. After a meeting, Rowboat feeds the notes back into the knowledge graph and updates the relevant people, project, and topic notes.\n- Browser: We added a built-in browser, isolated from your main one, where you can log in only to the accounts you want the assistant to help with. The assistant uses browser-use skills to navigate websites.\n- Parallel coding: The code-mode inside Rowboat lets you spin multiple instances of Claude Code or Codex and either work with them directly or let Rowboat use your work context to orchestrate them. We built an ACP (Agent Client Protocol) client in Rowboat for this.\n- Notes: Rowboat has an Obsidian-style local note-taking system. It comes with graph view, bases view, and voice notes. You can also sync Google Docs files and edit them inside Rowboat.\nYou can also build your own work surfaces inside Rowboat (web apps). Each app gets its own UI and a background agent, and can use all of Rowboat's tools, product integrations, and your work memory. For instance: an app to manage GitHub activity, project tracking, or ads campaign management. There are a few community apps at launch you can search and install, and you can publish your own by creating a GitHub repo for it and registering it.\nRowboat also indexes your work into a knowledge graph that all of the above surfaces use to have better context. We did a Show HN a few months back on this: https://news.ycombinator.com/item?id=46962641.\nAs an example that ties some of these together: you can create an app inside Rowboat that collects feature requests from your email, meetings, and Slack and ranks them, then uses Claude Code to draft a first version of the top-ranked feature, pulling prior context about it from your knowledge graph.\nRowboat is local-first: data is stored as plain Markdown files you can read, edit, or delete anytime. It is Apache-2.0 and works with any LLM, including local models through Ollama or LM Studio.\nWe’d love to hear your thoughts, and contributions are welcome!",
+      "url": "https://news.ycombinator.com/item?id=48819808",
+      "author": "segmenta",
+      "voiceId": "hackernews:user:segmenta",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-07",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 219,
+        "comments": 99
+      },
+      "parentId": null,
+      "threadId": "hn:story:48819808",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "219 points · 100th percentile of hackernews items in this run",
+      "engagementPercentile": 1
+    },
+    {
+      "id": "hn:comment:48813359",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Learning to code is still worthwhile",
+      "body": "There is programming that is like that - it is not all programming, and I strongly suspect not the the majority by dollars invested into developers - even it is less of an interior designer choosing paints and more of an entire designer designing an entire interior.\nOnce you get away from the very trivial side of programming, yes you are standing on the shoulders of giants, but the design decisions are in fact truly novel un-forced choices. Ask two people to make a \"note taking app for university students\" and you'll get two very differently shaped apps.",
+      "url": "https://news.ycombinator.com/item?id=48813359",
+      "author": "gpm",
+      "voiceId": "hackernews:user:gpm",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-07",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48810439",
+      "threadId": "hn:story:48810439",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48823391",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Re: I'm Begging You to Leave Your AI Note-Taker at Home",
+      "body": "Secretaries are compelled by the same privacy and disclosure laws as doctors - AI notetaking apps may or may not be (it'll take examination of the product on a case by case basis) and the public is, at this point, used to AI companies blatantly lying about privacy, confidentiality, training sources, reuse of conversations and pricing - the good faith is gone as a default and in a setting like a HCP that is a terrible place to start from.",
+      "url": "https://news.ycombinator.com/item?id=48823391",
+      "author": "munk-a",
+      "voiceId": "hackernews:user:munk-a",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-07",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48823024",
+      "threadId": "hn:story:48823024",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:story:48834432",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: Fluffy Sparrow – Frictionless, Fast, Note Taking App",
+      "body": "Hello HN,\nTaking notes should be frictionless, but for me with most of the note apps, there are too much frictions to quickly put down what I have in my mind, before long forgetting what I was intending to write\nSo, for that I built Fluffy Sparrow, a frictionless, fast, simple note taking app\nI have been working on it for last two years, on and off. I abandoned first version because it strayed away from the concept that I had in mind.\nThe primary target of this app was to be frictionless, and fast, so that I can just fire it up, and put down what's in my mind without thinking, and store all data in simple text format, which can also be filtered using *nix tools.\nAnd, happy to say this attempt clicked.\nIt supports, besides taking quick one liner notes; to-do, project, tags, inline calculations using fend[1], filtering, search, contexts\nAnd more features, like time tracking, reminders, KanBan, saving links, scripting are also in the pipeline. BUT you need not to use any of these features, if you don't want to, and they'll never get in your way.\nYes! There are many apps with those features, but this one's priority is extremely simple, fast, and frictionless note taking. And attempts has been, and will be made to keep it that way.\nThis is not a vibe coded app. It's all and all handy crafted :-)\nThe app is priced $15, one time payment.\nBut first 50 purchases are for $10.\nAnd you can try the full featured demo (except, it wont load saved files) here: https://github.com/tmahmood/fluffy_sparrow/releases/tag/v0.0...\nHere's a demo video of passing Moby Dick workout :-)\nhttps://youtu.be/fiJ0vJLhcN8\nBut actually, it can currently work with 7k lines. I am working on improving on that too.\nLet me know what do you think! I am open for suggestions, and improvements.\n[1] - https://printfn.github.io/fend/documentation/",
+      "url": "https://news.ycombinator.com/item?id=48834432",
+      "author": "t_mahmood",
+      "voiceId": "hackernews:user:t_mahmood",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-08",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 2,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "hn:story:48834432",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "2 points · 83th percentile of hackernews items in this run",
+      "engagementPercentile": 0.8269230769230769
+    },
+    {
+      "id": "gh:issue:4842749930",
+      "source": "github",
+      "kind": "issue",
+      "title": "[FEATURE] AI Doubt Bookmark & Favorites",
+      "body": "## **Is your feature request related to a problem? Please describe.**\n\nStudents often receive valuable explanations from the AI Tutor that they want to revisit later. As conversations grow longer, finding previously answered doubts becomes difficult, making revision less efficient.\n\n## **Describe the solution you'd like**\n\nIntroduce a **Bookmark & Favorites** feature that allows users to save important AI Tutor responses for quick access.\n\nThe feature should include:\n\n- Bookmark individual AI responses\n- View all bookmarked answers in a dedicated page or sidebar\n- Organize bookmarks by subject or custom tags\n- Search and filter bookmarked content\n- Remove bookmarks when no longer needed\n\nThis would make it much easier for students to build a personalized knowledge library without relying on external note-taking apps.\n\n## **Describe alternatives you've considered**\n\nCurrently, users must take screenshots or manually copy important responses into external applications like Google Docs or Notion, which is time-consuming and interrupts the learning workflow.\n\n## **Additional context**\n\nPossible enhancements include:\n\n- Favorite entire chat sessions\n- Color-coded tags for different subjects\n- Sort bookmarks by date or subject\n- One-click export of bookmarked notes\n- Sync bookmarks across devices",
+      "url": "https://github.com/MistryVishwa/edupilot-1/issues/82",
+      "author": "KolaSailaja",
+      "voiceId": "github:user:kolasailaja",
+      "container": "MistryVishwa/edupilot-1",
+      "publishedAt": "2026-07-09",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 4
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4842749930",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:48850573",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "What is Bending Spoons? The little-known AOL and Vimeo owner that's now public",
+      "body": "People are framing this like they're creating sustainable businesses, but if you look into the details, what they're consistently doing is stagnating on any kind of feature development, making the apps and sites more difficult to use and have more nags, and they're increasing prices, sometimes by 10x or 100x. When I look for a company that I think I would admire, I'm looking for customers that are satisfied and recommend the product to their friends.\nCharging $20,000 for a note-taking app subscription is not that.\nhttps://news.ycombinator.com/item?id=48849810",
+      "url": "https://news.ycombinator.com/item?id=48850573",
+      "author": "rpdillon",
+      "voiceId": "hackernews:user:rpdillon",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-09",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48799966",
+      "threadId": "hn:story:48799966",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48854674",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "EU Parliament greenlights Chat Control 1.0",
+      "body": "I don't know... I'm not European so I don't really care, but I feel like there are some jobs that have an existing overlap of _duty_. I was in the military, and PTO was viewed as a privilege, and sometimes leave was cancelled, but that makes sense because of the position. Other civilian jobs, like firefighters, police, maybe some medical practitioners, might have this same thing. Politicians I would say is definitely one of those positions, where you should actually be in \"public service\". Officials in a democracy are supposed to be elected not because we need people to fill vacant jobs, but because we need people to be on duty to make the hard decisions.\nBasically, I don't think politicians should be held to the same standard as some SWE making note-taking apps.",
+      "url": "https://news.ycombinator.com/item?id=48854674",
+      "author": "hunter-gatherer",
+      "voiceId": "hackernews:user:hunter-gatherer",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-10",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48843923",
+      "threadId": "hn:story:48843923",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48856109",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Show HN: Getting GLM 5.2 running on my slow computer",
+      "body": "Use the ticket system built into mininote.ink 's mcp server. Works perfect right out of the box. Also great notetaking app.\nDocs:\nhttps://mininote.ink/docs/mcp-docs",
+      "url": "https://news.ycombinator.com/item?id=48856109",
+      "author": "ai_fry_ur_brain",
+      "voiceId": "hackernews:user:ai_fry_ur_brain",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-10",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48842459",
+      "threadId": "hn:story:48842459",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48869558",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Good Tools Are Invisible",
+      "body": "Most programmers come to appreciate a single fundamental truth about their field way too late into their careers. That the most basic foundational unit, the substrate they need to conquer is text. Everything stems from it. We have to deal with text our entire lives. It doesn't matter where that text appears - in web browsers, in Jira, in Slack, terminal, in PDFs, Word or LaTeX documents. Code is just structured text. The feeling of empowerment and liberation when you can deal with text on your own terms is a disproportionate multiplier.\nVendors are designed to own you and ownership can have different forms. Slack.app that doesn't let you easily extract code snippets from a thread - owns you. Jira that forces you to use their imbecilic, quirky wysiwyg owns you. Note taking app that keeps the data in their db and not your files - ain't your friend. The friction is the ownership. When extraction of text requires effort, the tool has leverage over you. It's a subtler form than data lock-in - behavioral lock-in. You adapt your workflow to what the tool makes easy, and gradually the tool's affordances shape what you even think to do. Information gets buried in threads, search is mediocre, export is hostile. The \"solution\" they offer is to stay there longer - search in Slack, link to Slack, screenshare in Slack, summarize with AI in Slack, don't ever leave Slack. The tool becomes the answer to the problems the tool creates. It doesn't become \"invisible\" like the article says, you just don't realize that you're \"lost\" yourself in it.\nMost popular editors and IDEs don't give you direct leverage over plain text either, at least not without the effort from your side. Shortcuts, popups, UI elements in the IDE at best are local drivers - you can't easily grab a thing from the outside and feed it to your LLM context in the middle of a task, or insert within a comment in the code - you have to switch, copy, paste, deal with format inconsistencies, manual conversion, etc. Then we keep bargaining what method is the best, fastest and most convenient - using the mouse or keeping the fingers on the home row, modality or complex shortcuts. All for the sake of the problem that's artificially enforced on your workflows.\nTerminal-heavy users eventually start appreciating the leverage Unix philosophy grants them over text, but that's still contained within locality, they still have to constantly jump around, while eventually figuring out ways for automating some aspects of it.\nAnyway, this should be a little more of a deeper discussion than a forum comment. Point is - do not give in to the status quo. Liberate your text - deal with it on your terms. Get annoyed whenever you need to switch back and forth just for the sake of finding the piece you need and moving it around - it should be instantaneous and instinctual. Like boxers moving on a ring and casually throwing punches. Long time Vim and Emacs users \"get it\", even though often don't follow true - some things never become gratifying instincts. Sometimes, even the opposite forms - redundant muscle memories.",
+      "url": "https://news.ycombinator.com/item?id=48869558",
+      "author": "iLemming",
+      "voiceId": "hackernews:user:ilemming",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-11",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48858121",
+      "threadId": "hn:story:48858121",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "gh:issue:4865511046",
+      "source": "github",
+      "kind": "issue",
+      "title": "feature: Share Intent Extension for Receiving Shared Content on Android & iOS",
+      "body": "### Duplicate Check\n\n- [x] I have searched the [opened issues](https://github.com/flet-dev/flet/issues) and there are no duplicates\n\n### Describe the requested feature\n\nHi @FeodorFitsner  Flet currently has excellent support for building cross-platform applications with Python, but there is no built-in way for an application to receive content shared from other apps using the native Android Share Sheet or the iOS Share Extension.\n\nThis makes it difficult to build apps that integrate naturally with the operating system.\n\nCurrently, developers must implement platform-specific Android and iOS code themselves, which goes against Flet's goal of providing a Python-first development experience.\n\n### Suggest a solution\n\nI would like to see an official (or officially supported) **Share Intent** extension (Which we can build on top of [share_handler 0.0.25](https://pub.dev/packages/share_handler)) for Flet that allows applications to receive shared content from other apps.\n\nInstead of each developer implementing native platform code, Flet could expose a simple Python API while internally leveraging Flutter's existing ecosystem.\n\nThe extension could be implemented as a standalone package (for example, `flet-share-intent`) so it can evolve independently while being reusable across all Flet applications.\n\n---\n\n## Suggested API\n\n```python\nimport flet as ft\nimport flet_share_intent as share\n\n\ndef on_share(event):\n    print(event.type)\n    print(event.text)\n    print(event.urls)\n    print(event.files)\n\n\ndef main(page: ft.Page):\n    receiver = share.ShareIntent()\n\n    receiver.on_receive = on_share\n\n    page.overlay.append(receiver)\n\n\nft.app(main)\n```\n\nOr:\n\n```python\nintent = await share.get_initial_share()\n```\n## Proposed Features\n\n### Incoming content\n\n* URLs\n* Plain text\n* Images\n* Videos\n* Audio\n* PDFs\n* Documents\n* Multiple files\n* MIME type detection\n\n### Lifecycle\n\n* Cold start support\n* Warm start support\n* Background launch support\n* Event/listener API\n* Initial share retrieval\n\n### Android\n\n* ACTION_SEND\n* ACTION_SEND_MULTIPLE\n* Content URIs\n* Scoped Storage\n* Android 8+\n\n### iOS\n\n* Share Extensions\n* Files app\n* Photos\n* Safari\n* Messages\n\n---\n\n## Motivation\n\nMany modern mobile applications rely on the operating system's Share Sheet.\n\nExamples include:\n\n* Social media downloaders\n* Password managers\n* AI assistants\n* Bookmark managers\n* Note-taking apps\n* Translation apps\n* OCR apps\n* File managers\n* PDF readers\n* Media editors\n* Cloud storage apps\n\nWithout Share Intent support, these applications require extra manual steps or custom native code.\n\n### Screenshots\n\n_No response_\n\n### Additional details\n\nA practical example is my open-source project, **Vidsaver**:\n\n[https://github.com/fazi-gondal/Vidsaver](https://github.com/fazi-gondal/Vidsaver)\n\nCurrently, users must copy a social media link, open the app, paste it, and then start the download process.\n\nWith Share Intent support, the workflow becomes:\n\n* Tap **Share** in Instagram, TikTok, Facebook, X, YouTube, etc.\n* Select **Vidsaver**.\n* The app automatically receives the shared URL and begins processing.\n\nBeyond downloaders, this feature would benefit many other Flet applications, including AI assistants, note-taking apps, bookmark managers, password managers, OCR tools, translation apps, file managers, cloud storage clients, and media editors.\n\nThis would be a valuable addition to the Flet ecosystem because it enables a native mobile experience while keeping the developer workflow entirely Python-based.",
+      "url": "https://github.com/flet-dev/flet/issues/6671",
+      "author": "fazi-gondal",
+      "voiceId": "github:user:fazi-gondal",
+      "container": "flet-dev/flet",
+      "publishedAt": "2026-07-12",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4865511046",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:48885699",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Ask HN: What Are You Working On? (July 2026)",
+      "body": "I've been working on an LLM \"harness\" called Logbook[0] for fun with Codex.\nThe core idea was that I've always been a lousy notetaker, even going back to my school days years ago. I'm great at one-off and one-liner notes and occasionally more in-depth notes, but tend to not flesh them out fully enough to make them worth re-visiting.\nThis has been a struggle even as an engineer sitting in meetings or trying to absorb new information when starting a new job and ramping up.\nLogbook is meant to use an interaction paradigm we as engineers are using very often these days: it's a terminal UI in the vein of Claude Code, OpenAI Codex, etc.\nIt's targeted at the entry of free-flowing thoughts but you can also write longer notes by launching your default shell editor from within the tool.\nEach note is saved as markdown with some metadata and that metadata is then saved to a local SQLite DB.\nFor the LLM side, the tool extracts useful metadata from those notes and then performs some local ranking/categorization. It then has the ability to send a note or some metadata to a provider of your choosing (it's  straightforward to use OpenAI or something more broad and customizable like OpenRouter) for further enrichment or filtering.\nA couple examples of the currently implemented slash-commands: `/related` can be used to find related notes; say you've been scribbling down notes about OAuth or MCP servers and want to gather up the most relevant notes to one of those topics. Or you can use a `/gaps` command that'll help you find things you've taken notes about but without properly defining or providing context around them (i.e. you mention ID-JAG for OAuth but never actually say what ID-JAG is, this command will tell you this so you have a chance to review what you previously wrote and can then define exactly what that keyword is about).\nIt's still very much a work in progress. It's not meant to be a full-fledged note-taking app a la Obsidian or anything like that. I've just always preferred taking notes in markdown or plain text and this is a great way to continue doing that while also making enrichment of the notes pretty simple.\nYou may ask \"why not just use agent memories?\" I don't really like the idea of tightly coupling notes with codebases or agents and I don't find the current UX very intuitive at least for the way I prefer to take notes.\n[0] - https://github.com/joshwertheim/logbook/",
+      "url": "https://news.ycombinator.com/item?id=48885699",
+      "author": "joshuawertheim",
+      "voiceId": "hackernews:user:joshuawertheim",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-12",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48884984",
+      "threadId": "hn:story:48884984",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48893484",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Backtrack-Free Cursive",
+      "body": "The point about interaction with undo in a digital inking app is interesting.  Seems like with ML handwriting recognition, we could create a handwriting \"text editor\" instead of a drawing app that understands the semantic structure of the text and operates at that level instead of the individual stroke level.\nI had some friends who worked on this for a while but didn't get far with it.  It turns out it's tricky to design a general purpose system that adapts to users' handwriting idiosyncrasies and is fast enough to work in real time with handwriting with sufficient accuracy.\nSome of that work is still visible in the ChromeOS virtual keyboard handwriting mode, but it's very limited - one line at a time.  https://cursive.apps.chrome/ (the built-in note-taking app on Chromebooks) has some interesting inking gestures for manipulating written words, but doesn't have any semantic-level understanding.",
+      "url": "https://news.ycombinator.com/item?id=48893484",
+      "author": "wffurr",
+      "voiceId": "hackernews:user:wffurr",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-13",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48888518",
+      "threadId": "hn:story:48888518",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:story:48904884",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: BYO AI free notetaking with optional screen reading for OpenClaw/hermes",
+      "body": "I've built fully on-device (macOS) meeting transcription/summaries/action-items app. It uses parakeet and gemma 4 or OpenClaw or Hermes Agent to drive main functionalities. It's free, requires no account or email, and is source available.\nYou can also natively connect your own local/VPS OpenClaw or Hermes to use them, their memory and context, as a notetaker.\nAbout me: my name is Piotr. I'm having plenty of calls as a freelancing programmer, and have interest in audio domain, so it was natural for me to pick this as my side project. I struggled a bit with echo cancellation, and writing idiomatic plugins to let users use their OpenClaw or Hermes agents as BYO AI (basically backend). I started project coding Tauri app by hand, only after establishing architecture I started leaning on AI coding agents. I use Claude Code with https://github.com/openai/codex-plugin-cc for \"adversarial-reviews\".\nOn the website I've included an offer to upgrade StageWhisper Lite to Founders edition with one-time payment: this give screen reading (via accessibility tree) and proactive, two-way communication - that is, your connected agent can provide suggestions by listening to audio (Cluely style), and you can chat with it during the call. Again, you bring your own AI, so Founders is a single payment, no subscription offer.\nBoth apps include MCP and in-app chat with your transcripts and meeting notes. Both also allow to connect any model downloaded from HF or connecting OpenClaw/Hermes.\nI created StageWhisper Lite & Founders to test business feasibility of one-time payment AI apps that have no marginal costs (you either use local model or your own assistant).\nI hope you will enjoy free Lite app and consider upgrading to Founders.",
+      "url": "https://news.ycombinator.com/item?id=48904884",
+      "author": "piotraleksander",
+      "voiceId": "hackernews:user:piotraleksander",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-14",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 3,
+        "comments": 3
+      },
+      "parentId": null,
+      "threadId": "hn:story:48904884",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "3 points · 87th percentile of hackernews items in this run",
+      "engagementPercentile": 0.8653846153846154
+    },
+    {
+      "id": "reddit:post:R3",
+      "source": "reddit",
+      "kind": "post",
+      "title": "best note taking apps",
+      "body": "best note taking apps\nidc if irs paid. i just want good features which means diff types of pens and pages and ease of taking my psych notes in lectures. which app should i download?? &#32; submitted by &#32; /u/Sea_Perspective1271 &#32; to &#32; r/ipad [link] &#32; [comments]",
+      "url": "https://reddit.com/r/ipad/comments/1uw4wba/best_note_taking_apps",
+      "author": null,
+      "voiceId": "reddit:item:https://reddit.com/r/ipad/comments/1uw4wba/best_note_taking_apps",
+      "container": "r/ipad",
+      "publishedAt": "2026-07-14",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 2,
+        "comments": 13
+      },
+      "parentId": null,
+      "threadId": "reddit:post:R3",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "2 upvotes",
+      "engagementPercentile": null
+    },
+    {
+      "id": "hn:comment:48903636",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "The AI Whale Fall and Open Source",
+      "body": "Idea that AI is very expensive and will not be viable without \"subsidization\" for personal use is very shortsighted:\n1. We measure \"subsidization\" in relation to API pricing. API pricing is very overpriced, to compensate for this \"marketing subsidization\", R&D, and everything else. A few months ago, Anthropic was close to being profitable\n2. In general, OpenAI and Anthropic are US companies, and the US is known to have price disease, with all those huge salaries, multibillion note-taking apps, and fighter jets that cost too much to fly. China, and other countries in the future, could produce roughly the same output for way less money, as they did with everything else\n3. Compute progress still happens. We can already run models better than GPT-3.5 locally on an iPhone",
+      "url": "https://news.ycombinator.com/item?id=48903636",
+      "author": "brachkow",
+      "voiceId": "hackernews:user:brachkow",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-14",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48900231",
+      "threadId": "hn:story:48900231",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48906548",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Your 'app' could have been a webpage (so I fixed it for you)",
+      "body": "Well...\nSearch right now in the App Store for \"Morpho\" and you'll find a \"Morpho: Network\" app. That app says it's some sort of TODO/Note taking app. It uses very broad language in the screenshots and assets from morpho.org (a decentralized protocol).\nOnce you open the app, it immediately downloads another bundle using OTA updates and shows an entirely different app where you \"connect your wallet\". You can imagine what happens next.",
+      "url": "https://news.ycombinator.com/item?id=48906548",
+      "author": "ftchd",
+      "voiceId": "hackernews:user:ftchd",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-14",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48869989",
+      "threadId": "hn:story:48869989",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48913515",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Logseq 2.0 Beta (DB version) is here",
+      "body": "> and it's not an outliner\nWe probably have that in common that I went through a pretty long and exhausting journey of looking for the right note-taking app/PKMS, but while I started with the conviction that I needed an outliner, I landed elsewhere.\nI do appreciate the theoretical beauty of \"everything is a block\" (and for the record, that is approximated pretty closely in Trilium by \"(almost) everything is a note\"), but the execution is often messy (tags/models hierarchies are hard to build and keep consistent/up to date, there is always the duality between embedding and referring because sometimes a sub-block is a block, and that forces you into defining more types or risk losing context and not being able to find the note but by name, if you can even remember it, etc). Tana and its \"supertags\" comes pretty close to the perfect outliner because it has a convenient UX around all those pain points, but I find it exhausting to use over time/as the PKMS grows.\nI think Trilium saves me from a lot of cognitive burden by keeping the shape of the notes collection explicit and visible at all times (via its hierarchy). Also for the record, I'm not trying to brainwash you, only describing that there is a journey into and out of outliners :-)",
+      "url": "https://news.ycombinator.com/item?id=48913515",
+      "author": "ezst",
+      "voiceId": "hackernews:user:ezst",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-14",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48896229",
+      "threadId": "hn:story:48896229",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:story:48922706",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Launch HN: Coasty (YC S26) – An API for computer-use agents",
+      "body": "Hey HN, we’re Nitish and Prateek, the founders of Coasty (https://coasty.ai/computer-use). We’re building computer-use agents that can complete workflows inside legacy desktop software and web applications without usable APIs.\nDevelopers send Coasty a natural-language task either through our consumer app or through our API, select a machine or browser environment, and any relevant credentials or files. The agent then operates the interface through screenshots, mouse, and keyboard input, verifies the result, and returns a structured run record with screenshots, actions, outputs, and errors.\nHere is a raw demo of an agent completing a workflow in a legacy application(It’s a mockup): https://drive.google.com/file/d/1ZghU_3vsAYhHVz1bsvE0pkvZYk7...\nA lot of important software is still difficult to automate. Healthcare teams submit prior authorizations through payer portals, accounting teams enter data into desktop applications, and operations teams move information between internal systems, spreadsheets, and remote desktops. Many of these applications have no API, incomplete APIs, or integrations that take months to build.\nThe usual alternative is RPA, record a sequence of clicks and replay it. That works when the interface and workflow are predictable, but it often breaks when a button moves, a pop-up appears, a page loads slowly, or the application enters an unexpected state.\nCoasty takes a different approach. The agent observes the current screen, decides what action to take, executes it, and then observes the resulting state before continuing. It does not require DOM access, an accessibility tree, selectors, or an application-specific integration, so the same API can operate browsers, remote desktops, and older Windows applications.\nA simplified request looks roughly like this:\n\n  run = coasty.runs.create(\n      environment=\"vm_123\",\n      task=\"\"\"\n      Open the patient record in the billing portal.\n      Enter the attached authorization data.\n      Do not submit if the member ID or procedure code does not match.\n      Return the confirmation number.\n      \"\"\",\n      files=[\"authorization.pdf\"],\n      approval_required=[\"final_submission\"]\n  )\n\nThe response includes the final status, extracted outputs, a replay URL, and a timestamped event log:\n\n  {\n    \"status\": \"completed\",\n    \"output\": {\n      \"confirmation_number\": \"PA-184392\"\n    },\n    \"replay_url\": \"...\",\n    \"events\": [\n      {\n        \"type\": \"verification\",\n        \"field\": \"member_id\",\n        \"result\": \"matched\"\n      }\n    ]\n  }\n\nThe API can also pause a run for human approval, retry from a checkpoint, or return control to the developer when it encounters a condition the workflow did not anticipate.\nWe started working on this last summer, because we saw that models were getting better at vision but kept seeing a gap between computer-use demos and the reliability needed for production workflows. Getting an agent to complete a task once is fairly straightforward. Getting it to repeat that task, recover from unexpected states, avoid silently entering incorrect data, and produce evidence of what it did is much harder.\nWe built several layers around the underlying computer-use model. The system tracks the expected state of the workflow, detects when the application has diverged from that state, and can re-plan instead of continuing blindly. Developers can define invariants such as “the patient name must match the source document” or “never submit without approval,” and the agent checks those conditions during the run.\nEach run happens in an isolated virtual machine. We expose APIs for provisioning environments, uploading files, starting tasks, streaming events, inserting human approvals, and retrieving the full replay and audit trail. Environments can be kept alive across runs when the application has a long login flow or persistent local state.\nOne problem we are still working through is the tradeoff between speed and reliability. The agent can move faster by taking fewer observations and verification steps, but that becomes risky in workflows involving patient records, payments, or regulatory filings. We currently bias toward slower execution with more checks and let developers configure approval points and verification policies.\nWe are initially working with healthcare operations teams because their workflows combine many of the hardest conditions: payer portals, EHRs, PDFs, spreadsheets, remote desktops, and actions where quiet mistakes are expensive. We also expose the same infrastructure through the developer API for teams building their own agents and vertical automation products.\nWe currently charge based on agent runtime and workflow volume, with separate pricing for dedicated environments and enterprise deployments.\nWe’d especially appreciate feedback from people who have built and/or used browser agents, RPA systems, desktop automation, or agent infrastructure. We’re curious which parts of the API you would want direct control over, where you would prefer higher-level abstractions, and which failure modes have been hardest in your own automation systems.\nIf you've hit weird failure modes automating software like this, we want to hear about them. We'll be here all day answering questions and taking notes!",
+      "url": "https://news.ycombinator.com/item?id=48922706",
+      "author": "nkov47",
+      "voiceId": "hackernews:user:nkov47",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-15",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 44,
+        "comments": 26
+      },
+      "parentId": null,
+      "threadId": "hn:story:48922706",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "44 points · 94th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9423076923076923
+    },
+    {
+      "id": "gh:issue:4898242505",
+      "source": "github",
+      "kind": "issue",
+      "title": "Proposal: Built-in Split View (Dual-Pane) Support for Large Screens and Foldable Devices",
+      "body": "### Use case\n\nWhen running a Flutter app on large-screen devices (tablets, foldables, desktops), only one page is displayed at a time, leaving most of the screen unused. This is a significant gap compared to native platforms:\n\nAndroid provides SlidingPaneLayout for master-detail two-pane UIs\niOS provides UISplitViewController\nWeb has CSS multi-column / grid layouts\nCommon apps like email clients, settings, file managers, and note-taking apps universally use a master-detail split layout on large screens. Flutter developers currently have no built-in way to achieve this that transparently works with existing Navigator/Router APIs.\nTo achieve a split view today, developers must write a significant amount of application code: manually detecting screen size with MediaQuery, conditionally composing Row/Column layouts, duplicating navigation logic for each screen, and managing state synchronization between panes. This adaptation must be repeated for every page in the app, and it breaks standard Navigator/Router semantics (back button, route transitions, deep linking). The result is high development cost, fragile code, and inconsistent behavior across platforms.\n\n### Proposal\n\n### Existing Alternatives and Their Limitations\n\n| Solution | Type | App Adaptation Effort | Supports Router Routing? |\n|----------|------|----------------------|--------------------------|\n| `adaptive_scaffold` | Official package | High — requires redesigning layout tree and slot structure | N/A — does not involve navigation stack |\n| `flutter_split_view` (3rd-party) | Package | Medium — requires replacing routing API | No — does not support RouterDelegate/RouterConfig/go_router |\n| `flow_nav` (3rd-party) | Package | Medium — requires replacing routing API and custom route function mapping | Partial — large-screen implementation uses page replacement, no back navigation support |\n| Our approach (dual overlay) | Framework-level change | Low — just enable the toggle and specify split mode; app code essentially unchanged | Yes — supports both Navigator and Router routing |\n\n### Expected Effect\n\nAn app that currently looks like this:\n\n```\n┌─────────────────────────┐\n│                         │\n│      Single Page        │\n│                         │\n└─────────────────────────┘\n```\n\nShould automatically become this on wide screens, **without modifying the app's navigation code**:\n\n```\n┌───────────┬─────────────┐\n│           │             │\n│  Home     │  Detail     │\n│           │             │\n│           │             │\n└───────────┴─────────────┘\n```\n\n## Proof of Concept\n\nWe have completed a working proof of concept using the **dual-overlay approach**. The implementation supports all common Flutter routing patterns:\n\n### Supported Routing Patterns\n\n| # | Pattern | Entry Point |\n|---|---------|-------------|\n| 1 | `initialRoute` + `onGenerateRoute` | `MaterialApp` |\n| 2 | `initialRoute` + `routes` | `MaterialApp` |\n| 3 | `home` + `onGenerateRoute` | `MaterialApp` |\n| 4 | `home` + `routes` | `MaterialApp` |\n| 5 | `CupertinoApp` | `CupertinoApp` |\n| 6 | `RouterDelegate` + `pages` | `MaterialApp.router` |\n| 7 | `RouterConfig` | `MaterialApp.router` |\n| 8 | `go_router` | `MaterialApp.router` |\n\n### How It Works (Overview)\n\n1. **Dual overlay**: Replaces the `Navigator`'s single `Overlay` with two side-by-side `Overlay`s.\n2. **Route allocation**: Assigns route overlay entries to the appropriate overlay, enabling two pages to be visible simultaneously.\n3. **Navigation interception**: Intercepts push and pop operations to maintain split-view invariants (each overlay displays the expected page).\n4. **Popup handling**: `PopupRoute`s are assigned to the correct overlay, with a mirror barrier placed on the opposite side to block interaction.\n5. **Dynamic split view visibility**: Controls the visibility of left and right overlays to dynamically adjust whether the current page displays split view on screen orientation or size changes (landscape/portrait switch, fold/unfold), enabling seamless transitions.\n6. **Two-layer toggle design**: The split-view feature is implemented as a two-layer toggle — the first layer is an explicit opt-in by the app; when not enabled, the original behavior is fully preserved with zero intrusion; the second layer, once enabled, dynamically decides whether the current page presents split view based on screen resolution and orientation (landscape/portrait).\n\n### Demo \n\n<img width=\"640\" height=\"400\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/002b28e6-3f11-4c09-a139-4465689cf780\" />\n\n### Configuration\n\nOur local implementation currently reads configuration items such as split mode from a specific JSON configuration file. This is merely an implementation choice for the proof-of-concept stage. The configuration approach (file format, programmatic API, or framework integration) can be entirely adjusted according to upstream recommendations.\n\nWhat remains unchanged: no need to modify the app's `Navigator.push()`, `Navigator.pop()`, `context.go()`, or any other navigation code.\n\n## Comparison with Existing Solutions\n\n- **vs. `adaptive_scaffold`**: Zero intrusion, no need to redesign the layout tree. The two have different positioning: `adaptive_scaffold` is a layout slot system, while our approach is split view at the navigation stack level.\n- **vs. `flutter_split_view`**: No need to replace routing API, supports declarative routing; but requires modifying Navigator internals.\n- **vs. `flow_nav`**: The right pane maintains a real navigation stack (supports back navigation), no need to configure callbacks for each routing pattern; but requires modifying Navigator internals.\n\n## Implementation Approach\n\nThe proof of concept adds `SplitViewNavigatorPolicy` in `navigator.dart`, responsible for:\n\n- **Overlay entries reallocation**: In `NavigatorState.build`, route overlay entries are distributed to left and right overlays, enabling two pages to be visible simultaneously.\n- **Navigation operation interception**: Intercepts key push/pop operations to maintain split-view invariants, avoiding routing anomalies in multi-page scenarios.\n- **Popup and barrier handling**: Assigns `PopupRoute` to the correct overlay and places a mirror barrier on the opposite side to block interaction.\n- **Dynamic split view visibility**: Controls the visibility of left and right overlays to dynamically adjust whether the current page displays split view on screen orientation or size changes (landscape/portrait switch, fold/unfold), enabling seamless transitions.\n- **Forced split/no-split**: Supports forcing specific pages into split view or fullscreen mode (e.g., video player forced fullscreen).\n\nWe are also open to other approaches preferred by the official team.\n\n## Questions for the Flutter Team\n\n1. **Is this a feature direction the team would consider for inclusion in the framework?** Large-screen/foldable support is a stated priority, but current solutions (widget composition) require significant app changes. Would a more transparent, Navigator-level approach be welcome?\n\n2. **Does the team have existing development plans for similar functionality?** If related work is already underway, we want to avoid duplicating effort.\n\n3. **If the feature direction is acceptable, which implementation approach does the team prefer?** Specifically:\n   - Is directly modifying `navigator.dart` acceptable?\n   - Or should it be a pure package (at the cost of not supporting Router routing)?\n   - Or a new widget (e.g., `SplitViewNavigator`) wrapping `Navigator`?\n\n## Background\n\n- Platform: The implementation is cross-platform, with local testing done on Android Pixel Tablet emulator\n- Flutter version: Based on Flutter 3.41.9\n- Proof of concept tested with real applications (not just examples)\n\nWe are sharing this proposal early to get direction from the official team, avoiding investing significant work in an upstream-quality implementation only to be rejected. We can provide more details, code, or demos as needed.",
+      "url": "https://github.com/flutter/flutter/issues/189554",
+      "author": "wellwell27",
+      "voiceId": "github:user:wellwell27",
+      "container": "flutter/flutter",
+      "publishedAt": "2026-07-16",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 2,
+        "comments": 1
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4898242505",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "2 reactions · 100th percentile of github items in this run",
+      "engagementPercentile": 1
+    },
+    {
+      "id": "hn:story:48946288",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: Notvex – encrypted local-first notes with SQLCipher and XChaCha20",
+      "body": "Hi HN,\nNotvex is a local-first, encrypted note-taking that stores everything in a single .nvx file on your machine. No account, no server, no cloud dependency.\nThe idea came about because I needed to store sensitive information—including security notes, private keys, and seed phrases—but I didn't want to rely on an external service that could leak my data in the event of a security breach or revoke my access if I wanted to use it tomorrow. I wanted something in between: the simplicity of a notes app with the security of a password manager, but fully offline and self-contained. So I started creating this app, which meets that need.\nThe vault is a single .nvx file you own and control. SQLCipher (AES-256) encrypts the database at rest, XChaCha20-Poly1305 encrypts each note individually, and keys are derived with Argon2id, so the file is  completely opaque without your password. It also supports an optional key file for two-factor protection and a BIP39 recovery phrase as a fallback.\nI'd like to share this project with HW in case you find it useful, and get some feedback from the community.\nTHX :)",
+      "url": "https://news.ycombinator.com/item?id=48946288",
+      "author": "GFrancV",
+      "voiceId": "hackernews:user:gfrancv",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-17",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 2,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "hn:story:48946288",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "2 points · 83th percentile of hackernews items in this run",
+      "engagementPercentile": 0.8269230769230769
+    },
+    {
+      "id": "gh:issue:4911132647",
+      "source": "github",
+      "kind": "issue",
+      "title": "FR: Improve Apple Pencil / stylus drawing latency and stroke smoothness on iPad and tablets",
+      "body": "Problem\nYes.\n\nWhen drawing or handwriting in Excalidraw on iPad, strokes feel delayed and visually choppy compared to native note-taking apps like Goodnotes or Apple Notes.\n\nThe latency and rendering smoothness make handwriting feel less natural and reduce writing quality.\n\nThis is especially noticeable during:\n- fast handwriting\n- long note-taking sessions\n- quick sketching\n- continuous pen movement\n\nSolution\nPlease improve stylus rendering performance and stroke responsiveness, especially on tablets.\n\nPotential improvements could include:\n- lower input latency\n- smoother real-time stroke rendering\n- better Apple Pencil prediction handling\n- higher-frequency stroke updates\n- optimized rendering pipeline for handwriting\n- optional low-latency mode for note-taking\n\nReal-life usage scenarios\n- Taking handwritten notes during lectures or meetings\n- Brainstorming on infinite canvases\n- Fast sketching and ideation\n- Daily use of Excalidraw on iPad tablets\n\nImproving stroke smoothness would make Excalidraw much more competitive as a handwriting and note-taking platform.\n\nAlternatives\nCurrently, I use Goodnotes for handwriting instead.\nHowever, this workaround is horrible and does not work effectively.",
+      "url": "https://github.com/LennyMalcolm0/excalidraw/issues/72",
+      "author": "LennyMalcolm0",
+      "voiceId": "github:user:lennymalcolm0",
+      "container": "LennyMalcolm0/excalidraw",
+      "publishedAt": "2026-07-17",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4911132647",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "gh:issue:4912255852",
+      "source": "github",
+      "kind": "issue",
+      "title": "Design: transcript history (research UX of comparable dictation apps first)",
+      "body": "Future feature, flagged for research before design work starts.\n\n## The idea\n\nOnce translation/rewrite post-processing exists (see the preedit/pipeline\ndesign issue, #6), a single dictation interaction could produce multiple\nversions of the same utterance: the raw one-to-one ASR transcript, a\ntranslated version, a rewritten/polished version, etc. A history system would\nlet users go back and see exactly what was originally said and how it was\ntransformed — useful both for trust (\"did it actually understand me\ncorrectly?\") and for recovering a version they didn't keep (e.g. they wanted\nthe raw transcript after all, but only the polished version got inserted).\n\n## What needs research first (not implementation)\n\nBefore designing Kea's history feature, look at how comparable\nspeech-to-text/dictation apps handle this from a **user experience**\nperspective — not their implementation details:\n\n- Wispr Flow (this project's explicit inspiration, RFC §1) — does it keep a\n  history? What's stored per entry? Is it just the final text, or multiple\n  versions? How is the history surfaced (a list, searchable, editable)? Can\n  users re-insert an old entry, or copy/edit it?\n- Whisper Pro and other similar dictation/transcription apps — same\n  questions: what's the workflow from the user's side, end to end (dictate →\n  see history → do what with it?).\n- Worth also glancing at how voice-memo / note-taking apps with transcription\n  (e.g. Apple Voice Memos' transcript view, Otter.ai) handle showing an\n  original transcript alongside a processed/summarized version, since that's\n  structurally the same \"raw + derived\" problem.\n\nQuestions to answer from that research, to inform Kea's design:\n- Is history a full running log, or a \"last N\" scratchpad the user clears?\n- Do users expect to *edit* a past entry and re-commit it, or is it read-only\n  for reference?\n- Is there any expectation of it syncing/persisting across sessions, or is\n  it explicitly ephemeral/session-only (arguably more in line with this\n  project's local-first, no-cloud stance)?\n- How is multi-version storage (raw vs. translated vs. rewritten) actually\n  presented — tabs, diff view, a version picker?\n\n## Notes for whoever picks this up\n\n- RFC §3 currently lists \"Transcript history, scratchpad, personal\n  dictionary, snippets\" as an explicit v1 non-goal — that's fine, this is\n  intentionally a later-phase item, but the RFC should eventually gain a\n  section on it once designed (see the RFC-drift issue, #5).\n- Storage location/format should stay consistent with the project's\n  local-first, no-cloud-dependency stance (RFC §1, §3 G3) — whatever gets\n  designed here should assume on-disk local storage only, no telemetry, no\n  external sync, unless a future conversation with the user says otherwise.",
+      "url": "https://github.com/Su3h7aM/kea/issues/7",
+      "author": "Su3h7aM",
+      "voiceId": "github:user:su3h7am",
+      "container": "Su3h7aM/kea",
+      "publishedAt": "2026-07-17",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 1
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4912255852",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "reddit:post:R2",
+      "source": "reddit",
+      "kind": "post",
+      "title": "Best free note taking apps",
+      "body": "Best free note taking apps\nMention best apps for Android and Apple that are free don&#39;t mention piracy or anything where free is junk and unusable . &#32; submitted by &#32; /u/ChannelyourBets &#32; to &#32; r/NoteTaking [link] &#32; [comments]",
+      "url": "https://reddit.com/r/NoteTaking/comments/1uzrgjj/best_free_note_taking_apps",
+      "author": null,
+      "voiceId": "reddit:item:https://reddit.com/r/NoteTaking/comments/1uzrgjj/best_free_note_taking_apps",
+      "container": "r/NoteTaking",
+      "publishedAt": "2026-07-18",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 31,
+        "comments": 59
+      },
+      "parentId": null,
+      "threadId": "reddit:post:R2",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "31 upvotes",
+      "engagementPercentile": null
+    },
+    {
+      "id": "reddit:post:R4",
+      "source": "reddit",
+      "kind": "post",
+      "title": "Looking for a note taking app for university",
+      "body": "Looking for a note taking app for university\nHey all! I am looking for an app to take notes on my laptop in university classes. I have used Google docs up until now but I am not satisfied. I want something that looks good, not minimalist or most optimized or anything but cutesy and/or fun, round corners and pretty colours. I use Obsidian for generally keeping track of my life (but I don&#39;t like taking lecture notes there) and I use the Retroma theme there, to give you a little bit of a vibe I&#39;m looking for. And my browser has cats a",
+      "url": "https://reddit.com/r/ProductivityApps/comments/1uzvl95/looking_for_a_note_taking_app_for_university",
+      "author": null,
+      "voiceId": "reddit:item:https://reddit.com/r/ProductivityApps/comments/1uzvl95/looking_for_a_note_taking_app_for_university",
+      "container": "r/ProductivityApps",
+      "publishedAt": "2026-07-18",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 15,
+        "comments": 36
+      },
+      "parentId": null,
+      "threadId": "reddit:post:R4",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "15 upvotes",
+      "engagementPercentile": null
+    },
+    {
+      "id": "hn:comment:48956022",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "I started a “dirt notebook”",
+      "body": "I have a similar idea in the note taking app I've written for myself over a couple years. I have a new daily page everyday with a simple but powerful tagging system. Adding automation soon that will be kick ass, but for now the mcp server plus Claude Code is pretty dang powerful. It's basically a clone of logseq with my own features. It's got templates and saved views and powerful filtering. It's been super useful for me personally. I need to update the README though. https://github.com/steezeburger/brainspread/",
+      "url": "https://news.ycombinator.com/item?id=48956022",
+      "author": "steezeburger",
+      "voiceId": "hackernews:user:steezeburger",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-18",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48954149",
+      "threadId": "hn:story:48954149",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:48956238",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "I started a “dirt notebook”",
+      "body": "One of the nice things about notebooks (handwritten) is the juxtaposition of data, which makes it a joy to browse through and rediscover old thoughts and ideas.\nThe only note taking app I’ve found to be fun to browse is Google Keep. I love the layout, I love how things are “out of place”\nOn a side note, I’ve found Muji notebooks to hit that sweet spot where the paper is nice enough to write down something you want to keep and refer back to, and cheap enough that you can waste pages writing down spur of the moment thoughts and things.",
+      "url": "https://news.ycombinator.com/item?id=48956238",
+      "author": "wodenokoto",
+      "voiceId": "hackernews:user:wodenokoto",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-18",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:48954149",
+      "threadId": "hn:story:48954149",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:story:48971847",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: A canvas-based note taking and organizer app",
+      "body": "So I've been working on this app for a very long time now. Started off by wanting an app that separates long form notes from short form notes visually and keeps everything organized on a canvas.\nThe app features:\n-Sticky notes for quick, small notes and A4 notes for long form documents\n-A quick mode that uses local storage to quickly open the app and jot down a thought on the canvas\n-A PDF export option that exports your notes into 3 custom designed PDF styles\n-Visual hierarchy to replicate file structure instead of a linear fashion, where your files are notes, stacks are folders and labels are names for your folders\nWould love to continue working on this app if you guys like the concept.",
+      "url": "https://news.ycombinator.com/item?id=48971847",
+      "author": "passiflora96",
+      "voiceId": "hackernews:user:passiflora96",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-19",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 61,
+        "comments": 32
+      },
+      "parentId": null,
+      "threadId": "hn:story:48971847",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "61 points · 96th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9615384615384616
+    },
+    {
+      "id": "hn:story:48968447",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Ask HN: Does a local, Git-backed LLM \"compiler\" for personal notes make sense?",
+      "body": "Back in 2012, my very first startup was a note-taking and document storage app. Think Evernote meets Google Drive, but with a much faster UI. We managed to claw our way up to 1,800 active users. Then Google announced 25GB of free storage for Drive, and overnight, our business model evaporated. We had to shut down the company.\nI've been through the startup ringer four times since then. Despite the explosion of knowledge management tools over the last decade, I still manage almost my entire life and todo list in a single Markdown file. I’ve grown to severely distrust SaaS note-taking apps. I don't want my second brain held hostage by a monthly subscription, and I don't want it locked in a proprietary database.\nI'm thinking about building something new in this space, completely free and open-source, and I want a sanity check to see if anyone actually cares about this approach.\nThe Idea: A lightweight, native desktop and Mac/Windows app that acts as an \"LLM compiler\" for your local files (inspired by Andrej Karpathy's LLM wiki concept).\nHow it works:\nZero Cloud: You define a local folder on your machine.\nInvisible Git: Under the hood, the app initializes a Git repo and handles auto-commits every time a file changes (abstracting version control completely away for non-tech users).\nThe Compiler: You drop in raw PDFs, text, or docs. A deterministic background watcher picks them up, uses your own LLM API key (BYOK), and extracts/chunks them into structured, lightweight JSON/Markdown files optimized for local RAG.\nData Sovereignty: The app itself is just a fast, beautiful native text editor and search UI over that folder.\nWhy not just use what's out there?\nObsidian/Logseq: They require duct-taping together fragile community AI plugins that break during updates.\nNotion/NotebookLM: Your data is trapped in their cloud.\nLocal RAG (AnythingLLM, etc.): They feel like heavy developer tools and hide your data in opaque vector databases rather than clean, portable files.\nI don't plan to make money on this; I just want a long-term, durable solution for myself and plan to share the code.\nMy questions for HN:\nDoes the philosophy of treating the LLM strictly as a background \"compiler\" (rather than a chatbot) resonate with how you want to manage your knowledge?\nEven with Git completely abstracted away in the UI, is the Bring-Your-Own-Key (BYOK) model still too much friction for mainstream adoption?\nAm I overestimating how much people actually care about local data?\nWould love to hear your thoughts.",
+      "url": "https://news.ycombinator.com/item?id=48968447",
+      "author": "Chirag",
+      "voiceId": "hackernews:user:chirag",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-19",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 1,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "hn:story:48968447",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "1 points · 79th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7884615384615384
+    },
+    {
+      "id": "hn:story:48987509",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: Envy - A flat-file, frictionless note-taking application for macOS",
+      "body": "Hey all. I made this because, where I work, we aren't allowed to use any app that allows cloud-sync or AI within the application. I started with the things I needed (to-do lists, due dates, and interlinking) and I kept building up from there. I am hoping others in the community find it as useful as I do! Feedback is always appreciated. cheers.",
+      "url": "https://news.ycombinator.com/item?id=48987509",
+      "author": "widowlark",
+      "voiceId": "hackernews:user:widowlark",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-21",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 4,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "hn:story:48987509",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "4 points · 90th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9038461538461539
+    },
+    {
+      "id": "hn:story:48991094",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: ChatPanel, A Privacy-first AI Agent browser side panel",
+      "body": "I needed an AI agent that understands my work better (meetings, notes, chats and lives where I access the web) and gives me flexibility to use the model of choice. So, I built this and I am a 100x engineer now.\nA few features to highlight.\n- You bring your own Agent (Codex, claude code etc) or local models or in-browser models or remote models\n- A live meeting assistant. You got to try to this to see the power of it\n- A local note taking app where AI Agents live\n- Voice to Text (all local)\n- NER and PII redaction before sending data to agents, models\n- Search across your chats,  notes and meetings\n- Try asking drawing stuff on excalidraw ot tldr draw in browser act mode\n- in-built MCP hub you can add\n- Bring your own CLI agent (pi, opencode etc)\nComplete flexibility on which model, agent you want to send each message to while we don't track any data. Its Open source for you to validate all the privacy claims to build your trust\nYou just need the browser extension and associated npm packages to build the bridge between your AI agents/models and the extension. Give it a try.",
+      "url": "https://news.ycombinator.com/item?id=48991094",
+      "author": "earth2mars",
+      "voiceId": "hackernews:user:earth2mars",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-21",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 4,
+        "comments": 1
+      },
+      "parentId": null,
+      "threadId": "hn:story:48991094",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "4 points · 90th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9038461538461539
+    },
+    {
+      "id": "hn:story:49014798",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Why I'm building a note taking app without AI",
+      "body": "",
+      "url": "https://news.ycombinator.com/item?id=49014798",
+      "author": "davnicwil",
+      "voiceId": "hackernews:user:davnicwil",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-22",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 19,
+        "comments": 16
+      },
+      "parentId": null,
+      "threadId": "hn:story:49014798",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "19 points · 92th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9230769230769231
+    },
+    {
+      "id": "hn:story:49021801",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Show HN: Note taking and book Library, all-in-one AI KnowledgeBase",
+      "body": "Hi HN,\nI built an all-in-one AI KnowledgeBase, using AI with\n- Note taking\n- Library and Reading\nPileaX is a local-first, all-in-one AI knowledge base that integrates AI chat, smart notes, and e-book reading & management. From knowledge creation to application, PileaX helps you build a unified knowledge base and continuously optimizes the AI interaction experience with AI agent technologies.Your data is fully under your control. It supports offline desktop apps and flexibly deployable web apps.\n- Desktop Platform: Windows, macOS, Linux\n- EBook: EPUB, MOBI, AWZ3, FB2, CBZ, PDF\nHome: https://pileax.ai\nGitHub: https://github.com/pileax-ai/pileax\nWould love feedback!",
+      "url": "https://news.ycombinator.com/item?id=49021801",
+      "author": "pileax",
+      "voiceId": "hackernews:user:pileax",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-23",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 3,
+        "comments": 1
+      },
+      "parentId": null,
+      "threadId": "hn:story:49021801",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "3 points · 87th percentile of hackernews items in this run",
+      "engagementPercentile": 0.8653846153846154
+    },
+    {
+      "id": "hn:comment:49019312",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Terence Tao's ChatGPT conversation about the Jacobian Conjecture counterexample",
+      "body": "Good writeup, and certainly food for thought.\nI wonder if this key point actually holds though:\n>The skills to do so, however, are a function of someone who has experienced the friction and challenges over time that culminate in \"good taste\".\nIt's certainly sometimes true, but I don't think it's a general rule. Sometimes friction is just friction and sometimes you spend 1000 hours learning something that disappears and becomes obsolete or at least irrelevant to the goal.\nProgrammers used to need to know the instruction set of the CPU, assembly language and so on. Some still do but for most developers today that's not useful. Everything you know about 6800 assembly will not make your note-taking app any better.\nI think we are in a state where AI tools so easily mimic what we used to do by hand that we think the friction is gone, but that's because we haven't raised the bar yet. One day we'll look at the Fable one-shot that's better than anything we ever made by hand ourselves and say \"It could be even better\".\nAnd then the friction is back, just on a new level.",
+      "url": "https://news.ycombinator.com/item?id=49019312",
+      "author": "Kon5ole",
+      "voiceId": "hackernews:user:kon5ole",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-23",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49010345",
+      "threadId": "hn:story:49010345",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49022864",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Terence Tao's ChatGPT conversation about the Jacobian Conjecture counterexample",
+      "body": "> Everything you know about 6800 assembly will not make your note-taking app any better.\nIt could. It could make a simple note-taking app not take gigabytes of memory and take visible delay on each click. Most people don't bother of course because simple note-taking app is not worth the effort. It's possible to do better, it's just often not practical.",
+      "url": "https://news.ycombinator.com/item?id=49022864",
+      "author": "smsm42",
+      "voiceId": "hackernews:user:smsm42",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-23",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49010345",
+      "threadId": "hn:story:49010345",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49025767",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Writing by hand is good for your brain",
+      "body": "Writing by hand has some advantages and writing by keyboard also has some advantages. Using note-taking app or similar software is very convenient and useful in some situations.",
+      "url": "https://news.ycombinator.com/item?id=49025767",
+      "author": "lilerjee",
+      "voiceId": "hackernews:user:lilerjee",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-23",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49022152",
+      "threadId": "hn:story:49022152",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49027791",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Terence Tao's ChatGPT conversation about the Jacobian Conjecture counterexample",
+      "body": "> Everything you know about 6800 assembly will not make your note-taking app any better.\nFor most apps, it makes sense to profile your app for expected use cases. Put even minimal thought into making the hot codepaths faster by moving unnecessary operations out of it.",
+      "url": "https://news.ycombinator.com/item?id=49027791",
+      "author": "chorizo",
+      "voiceId": "hackernews:user:chorizo",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-23",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49010345",
+      "threadId": "hn:story:49010345",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49032976",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Terence Tao's ChatGPT conversation about the Jacobian Conjecture counterexample",
+      "body": ">It could. It could make a simple note-taking app not take gigabytes of memory and take visible delay on each click.\nBut the taste that tells you a note taking app should be fast doesn't come from your knowledge of assembly. It comes from using the app.\nBeing able to have an AI generate 8 variants of an UI and 5 variants of a storage mechanism is more helpful to reach the goal of a good note-taker. Trying out those prototypes and tweaking them to perfection is also friction, only it happens closer to your actual goal than doing quicksort in assembly.\nThere are of course examples where the friction does help, and where the \"aid\" of the tool deteriorates useful skills, but I think that will sort itself out over time. Useful skills will remain, useless ones will disappear, as they always have.",
+      "url": "https://news.ycombinator.com/item?id=49032976",
+      "author": "Kon5ole",
+      "voiceId": "hackernews:user:kon5ole",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-24",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49010345",
+      "threadId": "hn:story:49010345",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "gh:issue:4982454177",
+      "source": "github",
+      "kind": "issue",
+      "title": "Adding the ability to open other notes created from other apps",
+      "body": "**Is your feature request related to a problem? Please describe.**\nI cannot import notes from other apps.\n\n**Describe the solution you'd like**\nI would like for the app to be able to open notes in general. Right now, you can import and backup notes, but only the notes created by this app. Importing/Opening notes in general from supported extensions would make migration from other note taking apps way easier.\n\n**Describe alternatives you've considered**\nCreating the notes I have in another app manually in this app.\n\n**Additional context**\nNo additional context required.",
+      "url": "https://github.com/Fandroid745/Open-notes/issues/65",
+      "author": "ruben1PvP",
+      "voiceId": "github:user:ruben1pvp",
+      "container": "Fandroid745/Open-notes",
+      "publishedAt": "2026-07-26",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 1,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4982454177",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "1 reactions · 93th percentile of github items in this run",
+      "engagementPercentile": 0.9285714285714286
+    },
+    {
+      "id": "gh:issue:4980812234",
+      "source": "github",
+      "kind": "issue",
+      "title": "Beat the Panic Loop: Smarter Note-Taking for Complex Chemistry",
+      "body": "## Beat the Panic Loop: Smarter Note-Taking for Complex Chemistry\n\nThe Root Causes of the O-Chem Note-Taking Struggle Organic Chemistry is fundamentally different from General Chemistry. You aren't just tracking numbers or balancing equations; you're tracking the movement of electrons in a three-dimensional space. When a professor flips through slides every 40 seconds, the cognitive load becomes immense. You're trying to listen to the explanation, understand the electronic effect, and physically draw a curved arrow—all at once. The primary challenge is the drawing bottleneck . Your brain can process the concept faster than your hand can sketch a benzene ring or a complex transition state. When you fall behind by even one slide, you enter a panic loop: you stop listening to try and finish the previous drawing, which means you miss the explanation for the current slide, making the next drawing even harder to start. Another core issue is the sync gap . Audio recordings are a great safety net, but they are linear. Mechanisms are spatial. Trying to scrub through a 60-minute audio file to find the exact second the professor explained a specific nucleophilic attack is a waste of precious study time. You need a way to anchor the audio to the visual image without spending hours meticulously timestamping. Solving the Drawing Bottleneck: The Pre-emptive Strategy If you are trying to draw every single atom and bond from scratch during a 300-level lecture, you will lose. The secret to efficiency in O-Chem isn't faster handwriting; it's reducing the amount of handwriting you have to do. The Slide-Printing Method If your professor posts slides before class, stop using a blank notebook. Print the slides (four to a page or using a tablet) and use them as your primary canvas. Instead of drawing the starting material and the product, you only draw the curved arrows and the intermediates . This removes about 60% of the manual labor from your note-taking process. For those using tablets, the \"screenshot and annotate\" method is the gold standard. Take a screenshot of the slide, paste it into your note app, and draw the mechanism directly over the image. This ensures your sketches are perfectly aligned with the professor's logic. The Shorthand System Develop a personal shorthand for common groups. Don't write \"tert-butyl\" every time; use a specific symbol or a simplified skeletal structure. Create a legend in the front of your notebook for these shortcuts. When the professor is moving fast, a quick symbol for a protecting group or a specific reagent (like PCC or LiAlH4) saves seconds that add up over a two-hour lecture. Marcus, a sophomore Chemistry major in 2022, was failing his midterms because his notes were a chaotic mess of half-finished hexagons. He switched to printing the lecture slides in advance and only drawing the electron flow arrows during class. He went from spending 80% of his energy on drawing to 20%, allowing him to actually listen to the \"why\" behind the reaction. His grade jumped from a C- to an A- by the final exam. Bridging the Sync Gap: Integrated Audio and Visuals Since standard audio recording isn't working for you, you need a system that links sound to a specific point in your notes. This is where \"audio-anchoring\" comes in. Using Digital Ink with Audio Sync If you have access to a tablet and stylus, apps like Notability or GoodNotes offer a feature where the audio is recorded in real-time as you write. When you play the audio back, the app highlights exactly what you were drawing at that moment. If you missed a step in a mechanism, you don't have to guess where it happened; you simply tap the drawing of the intermediate, and the audio jumps to that exact second. The Manual Timestamp Method If you prefer paper, use a digital recorder or phone app that shows a running timer. Every time the professor moves to a new slide or a critical mechanism step, jot down the time (e.g., \"12:40\") in the margin of your notes. This creates a rough index. When you get home, you only have to listen to the 30 seconds surrounding that timestamp to fill in the missing arrow or reagent. The \"Gap-Fill\" Workflow Accept that you will miss things. Instead of panicking and stopping, leave a physical gap in your notes. Mark it with a large, red question mark. Keep moving. The goal of the lecture is to capture the conceptual logic , not every single line. Use the recording or a classmate's notes to fill those gaps within 24 hours of the lecture while the memory is still fresh. Optimizing Your Review for High-Speed Content Note-taking doesn't end when the bell rings. In O-Chem, the \"processing\" phase is where the actual learning happens. If you just leave your notes as a series of fast-paced sketches, you won't be able to apply them to a new molecule on a test. The Mechanism Mapping Technique After class, take your fragmented notes and translate them into a \"Master Map.\" Instead of a linear list of reactions, create a visual web. Put a central functional group (like an alkene) in the middle and draw arrows radiating outward to all the possible reactions it can undergo. This forces you to synthesize the fast-paced slides into a coherent system. The Active Recall Loop Don't just read your notes. Cover the mechanism and try to redraw the electron flow from memory. If you get stuck, refer back to your audio-synced notes or the slide. This identifies exactly where your understanding broke down during the fast-paced lecture. Sarah, a junior Chem major, struggled with the \"firehose\" effect of her 300-level O-Chem course. She felt she was just copying shapes without understanding them. She started a \"Post-Lecture Audit\" where she spent 30 minutes after every class converting her shorthand notes into full, colored mechanisms. By forcing herself to redraw the \"missing steps\" she'd marked with question marks, she stopped relying on the professor's pace and started building her own mental framework. Choosing the Right System for Your Learning Style Not every student thrives with the same tools. Your choice depends on whether you are a visual processor or a conceptual listener. Student Profile Recommended System Primary Tool Key Advantage The Visual Sketcher Slide Annotation Tablet + Stylus Zero time wasted on basic structures. The Conceptual Listener Audio-Anchoring Digital Ink App Connects \"why\" to \"how\" instantly. The Traditionalist Timestamping Paper + Voice Recorder High tactile memory and focus. The Overwhelmed Beginner Pre-Printed Slides Printed PDF + Pens Lowest cognitive load during class. What to Do If You're Still Stuck Sometimes, even the best system can't overcome a professor who is simply moving too fast for the average human. If you've tried these methods and you're still drowning, it's time for a strategic pivot. First, form a \"Note-Pool\" with two or three trusted classmates. Use a shared folder (like Google Drive or Dropbox) to upload your notes after every lecture. One person might catch the reagent the professor mentioned in passing, while another might have sketched the transition state more clearly. Comparing notes is the fastest way to find the holes in your own understanding. Second, utilize office hours for \"Mechanism Audits.\" Don't go in and say, \"I don't get this chapter.\" Instead, bring your notes and say, \"On slide 14, I missed the step between the carbocation and the final product. Can you explain the electron flow here?\" This shows the professor you're putting in the work and gives you a concrete answer. Finally, supplement with external visualizations . If the slides are too fast, find a YouTube creator or an OpenCourseWare module that covers the same mechanism. Watching a slow-motion animation of a reaction can provide the visual intuition you missed during the 40-second slide flip, making your own notes make sense. Organic Chemistry Efficiency Action Plan The Problem The Solution First Step to Take Today Drawing takes too long Slide Annotation/Pre-printing Download the next lecture's slides and print them. Audio doesn't match visuals Audio-Anchoring/Timestamping Install a digital ink app or set up a timer for the next class. Missing critical steps The \"Gap-Fill\" Workflow Start marking missed steps with a red \"?\" instead of stopping. Notes feel fragmented Mechanism Mapping Pick one reaction from today and draw it as a visual web. Still confused after class Note-Pool / Office Hours Message two classmates to start a shared notes folder.\n\nhttps://edupathhub.online/articles/how-can-i-boost-my-note-taking-efficiency-for-a-300-level-organic-chemistry-lect?ref=github_issue",
+      "url": "https://github.com/dipakkr/A-to-Z-Resources-for-Students/issues/1526",
+      "author": "lirikpas",
+      "voiceId": "github:user:lirikpas",
+      "container": "dipakkr/A-to-Z-Resources-for-Students",
+      "publishedAt": "2026-07-26",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4980812234",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "reddit:post:R1",
+      "source": "reddit",
+      "kind": "post",
+      "title": "Note-Taking Apps",
+      "body": "Note-Taking Apps\nGuys please recommend me some good note-taking apps, done with manual notes &#32; submitted by &#32; /u/Charming-Kelly-897 &#32; to &#32; r/NoteTaking [link] &#32; [comments]",
+      "url": "https://reddit.com/r/NoteTaking/comments/1v7uxxu/notetaking_apps",
+      "author": null,
+      "voiceId": "reddit:item:https://reddit.com/r/NoteTaking/comments/1v7uxxu/notetaking_apps",
+      "container": "r/NoteTaking",
+      "publishedAt": "2026-07-27",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 26,
+        "comments": 72
+      },
+      "parentId": null,
+      "threadId": "reddit:post:R1",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "26 upvotes",
+      "engagementPercentile": null
+    },
+    {
+      "id": "gh:issue:4983757750",
+      "source": "github",
+      "kind": "issue",
+      "title": "Phase 2: Core Apps Development - Notes, Music, Calendar, Chatbot, Weather & Games",
+      "body": "## 🎯 Objective\nDevelop the 6 core applications that provide the main functionality of Digital Life OS.\n\n## 📋 Description\nThis phase implements all the primary applications: Notes for quick note-taking, Music Player for audio playback with visualizer, Calendar for event management, Chatbot for AI conversations, Weather for real-time weather, and Mini-games for entertainment.\n\n## ✅ Acceptance Criteria\n\n### Notes App\n- [ ] Create new notes with title and content\n- [ ] Read/view all saved notes\n- [ ] Edit existing notes\n- [ ] Delete notes with confirmation\n- [ ] Rich text formatting (bold, italic, underline)\n- [ ] Tags and categories for organization\n- [ ] Search functionality across notes\n- [ ] Auto-save to localStorage\n- [ ] Notes persist after page refresh\n\n### Music Player App\n- [ ] Display music library/playlist\n- [ ] Play/pause audio controls\n- [ ] Skip to next/previous track\n- [ ] Volume control slider\n- [ ] Progress bar showing current playback position\n- [ ] Seek to position by clicking progress bar\n- [ ] Current song info display (title, artist, duration)\n- [ ] Playlist creation and management\n- [ ] Canvas-based audio visualizer\n- [ ] Shuffle and repeat modes\n\n### Calendar App\n- [ ] Display current month calendar grid\n- [ ] Navigate between months\n- [ ] Create events on specific dates\n- [ ] View event details\n- [ ] Edit existing events\n- [ ] Delete events\n- [ ] Event categories with color coding\n- [ ] Upcoming events preview\n- [ ] Date selection highlight\n- [ ] Event persistence in localStorage\n\n### Chatbot App\n- [ ] Display conversation interface\n- [ ] Send messages and display in chat\n- [ ] Receive AI responses\n- [ ] Conversation history display\n- [ ] Clear conversation option\n- [ ] Multiple personality modes\n- [ ] Typing indicators\n- [ ] Message timestamps\n- [ ] Auto-scroll to latest message\n- [ ] Conversation persistence\n\n### Weather App\n- [ ] Display current weather conditions\n- [ ] Show temperature and weather description\n- [ ] Display 7-day forecast\n- [ ] Location-based weather detection (geolocation API)\n- [ ] Search for weather by city name\n- [ ] Multiple city support and favorites\n- [ ] Weather icons/images for conditions\n- [ ] Integration with OpenWeatherMap API\n- [ ] Wind speed and humidity display\n- [ ] Weather alerts for severe conditions\n\n### Mini-Games Suite\n- [ ] 2048 Game: Swipe/arrow keys to move tiles\n- [ ] Tic-Tac-Toe: Two-player mode against AI\n- [ ] Memory Match: Flip cards to find matching pairs\n- [ ] Snake: Classic snake movement and collision detection\n- [ ] Score tracking for each game\n- [ ] High score persistence in localStorage\n- [ ] Game reset functionality\n- [ ] Smooth game animations\n\n## 📊 Subtasks\n- [ ] Implement Notes app (app.js, ui.js, controller.js)\n- [ ] Implement Music Player with visualizer\n- [ ] Implement Calendar with event management\n- [ ] Implement Chatbot with AI responses\n- [ ] Implement Weather app with API integration\n- [ ] Implement 2048 game logic\n- [ ] Implement Tic-Tac-Toe game with AI\n- [ ] Implement Memory Match game\n- [ ] Implement Snake game\n- [ ] Create app-specific CSS files\n- [ ] Test all apps for functionality\n\n## 🧪 Testing Steps\n1. Launch each app from taskbar\n2. Test all CRUD operations for Notes, Calendar\n3. Test Music Player with sample audio files\n4. Test Chatbot conversation flow\n5. Test Weather app with different cities\n6. Test all mini-games for gameplay and scoring\n7. Verify data persistence after refresh\n8. Test error handling and edge cases\n\n## 📝 Notes\n- Apps should be modular and independent\n- Each app has its own folder with UI and logic separation\n- All data persists in localStorage\n- Apps should load quickly and smoothly\n- Implement error handling for API calls\n\n## 🔗 Related\n- Depends on Phase 1: Core Desktop UI\n- Blocks Phase 3: Smart Features",
+      "url": "https://github.com/Alaashamel/digital-life-os/issues/2",
+      "author": "Alaashamel",
+      "voiceId": "github:user:alaashamel",
+      "container": "Alaashamel/digital-life-os",
+      "publishedAt": "2026-07-27",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4983757750",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "gh:issue:4988873556",
+      "source": "github",
+      "kind": "issue",
+      "title": "Feature Request: Option to hide app from system dock / run in background (Wayland support)",
+      "body": "The Problem:\nI want to keep sticky notes running continuously, but having the app icon always visible in my dock clutters my workspace. Because I am on Ubuntu 26 with Wayland, external workarounds to hide running apps from the dock no longer work.\n\nThe Solution:\nPlease add a built-in setting to \"Hide from dock\" or \"Minimize to system tray.\" This would allow the app to stay active and accessible in the background without taking up space on the main dock.",
+      "url": "https://github.com/dstushar7/sticky-notes/issues/20",
+      "author": "dishanagalawatta",
+      "voiceId": "github:user:dishanagalawatta",
+      "container": "dstushar7/sticky-notes",
+      "publishedAt": "2026-07-27",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:4988873556",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:49066057",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Scriptc by Vercel: TypeScript-to-Native compiler, no JavaScript engine in binary",
+      "body": "Some of us don’t like Spotify, Slack, Discord, and a simple notes app taking 1-2GB of RAM each..",
+      "url": "https://news.ycombinator.com/item?id=49066057",
+      "author": "repeekad",
+      "voiceId": "hackernews:user:repeekad",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-27",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49063175",
+      "threadId": "hn:story:49063175",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49077321",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Pocketbyte: Modular ESP32-S3 Pocket Computer for Games, Music, and PDA Stuff",
+      "body": "This is a project I've been working on for over a year and a half now.\nIt's an open-source modular pocket device based on the ESP32-S3. The entire bottom half can be swapped out with different modules like a gamepad, a Blackberry-style keyboard, and even DIY modules.\nI wanted to build a device that would allow me to do things like play games, listen to music, and take notes without getting distracted by my phone. It's more like a PDA than a smartphone though.\nIt can be customized in many different ways and aligns with right-to-repair, DIY, and hacking.\nSome of the stuff it can run are:\n- Retro emulation (up to SNES and Genesis)\n- Various game ports (Quake, Duke Nukem 3D, etc)\n- Celeste (PICO-8 port)\n- MP3 player app (it has a stereo headphone jack)\n- Custom indie games (made using the C library, supporting various graphics backends)\n- Text editor/note taking app that can sync to your computer\nThere's some cool stuff like an App Store that allows you to download programs via Wi-Fi! Plus the \"OS\" is inspired by the 3DS!\nThere are even more things I want to get it running in the future, like an SSH client so it can be used for portable admin stuff. The keyboard module will unlock a ton of possibilities.\nIt's 90% done, currently focusing on finishing the keyboard module and finalizing the shell. Software is still WIP (will be released at V1.0.0), and schematics will be released after I build first batch of DevKits.\nLet me know what you think!",
+      "url": "https://news.ycombinator.com/item?id=49077321",
+      "author": "omrawaley",
+      "voiceId": "hackernews:user:omrawaley",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-27",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49077320",
+      "threadId": "hn:story:49077320",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:story:49091730",
+      "source": "hackernews",
+      "kind": "post",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "",
+      "url": "https://news.ycombinator.com/item?id=49091730",
+      "author": "handfuloflight",
+      "voiceId": "hackernews:user:handfuloflight",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 151,
+        "comments": 81
+      },
+      "parentId": null,
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "151 points · 98th percentile of hackernews items in this run",
+      "engagementPercentile": 0.9807692307692307
+    },
+    {
+      "id": "gh:issue:5009614300",
+      "source": "github",
+      "kind": "issue",
+      "title": "[FEATURE] Allow Claude Pro/Max subscription auth to be used from third-party apps (not just Claude Code / claude.ai)",
+      "body": "### Problem Statement\n\nAnthropic's Consumer ToS currently restricts OAuth tokens from Free/Pro/Max subscriptions to first-party surfaces only (Claude Code and claude.ai). Related prior requests on this were closed:\n- #18340 (closed as duplicate)\n- #1454 (closed as Not Planned)\n\nI want to raise this again with a concrete, current product scenario rather than an abstract \"please open this up\" ask.\n\n### Use Case Example\n\nHeptabase (a note-taking app) recently shipped an in-app AI chat feature where the message composer lets you choose which \"engine\" pays for the message: Heptabase's own credits, your own API key, or — notably — your own **ChatGPT Codex plan subscription**. When you pick the Codex option, the conversation runs against your personal ChatGPT/Codex quota (not billed per-token), and keeps its own memory/session state inside Heptabase.\n\nWhen asked whether the same could be done with a Claude subscription, Heptabase's founder confirmed this isn't possible today, specifically because Claude's Pro/Max OAuth credential is restricted to Claude Code and claude.ai per Anthropic's terms — unlike OpenAI, which apparently permits this kind of bring-your-own-subscription usage from third-party apps for Codex.\n\n### Proposed Solution\n\nSome option that lets a subscriber authorize a *specific*, user-approved third-party app to spend against their own Pro/Max quota (with clear rate limits matching their tier), rather than forcing pay-per-token API billing for any non-Anthropic surface. This could be a narrower, explicitly-consented variant of OAuth (e.g. a scoped token type distinct from the current Claude Code/claude.ai one) rather than reopening the same broad OAuth token for all third parties.\n\n### Alternative Solutions\n\nContinuing to require API-key billing for any third-party integration is the current state — this issue is asking Anthropic to reconsider that boundary given real user demand (as seen in #18340, #1454, and this Heptabase example), not to bypass it via workarounds.\n\n### Priority\n\nMedium - Would be very helpful\n\n### Additional Context\n\nThis is a policy/product question (Anthropic's own ToS boundary), not a technical limitation — `claude setup-token` shows the infrastructure to mint subscription-scoped tokens already exists.",
+      "url": "https://github.com/anthropics/claude-code/issues/82266",
+      "author": "helmet-png",
+      "voiceId": "github:user:helmet-png",
+      "container": "anthropics/claude-code",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:5009614300",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:49092157",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "I feel like there's not enough content on the landing page to help me understand why I need yet another notetaking app. The burden of proof is high given how many of these there are.",
+      "url": "https://news.ycombinator.com/item?id=49092157",
+      "author": "flippyhead",
+      "voiceId": "hackernews:user:flippyhead",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49092622",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "There's even a community plugin MCP that makes this easier. Afaik the hot reload is the only thing that \"beats\" this but I haven't had issues with Agents interacting with obsidian through the MCP - I'm not sure how much more useful it is to talk with an agent through a note taking app vs through its CLI.",
+      "url": "https://news.ycombinator.com/item?id=49092622",
+      "author": "swedishagentic",
+      "voiceId": "hackernews:user:swedishagentic",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49093431",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "can we have a moratorium on notetaking apps?",
+      "url": "https://news.ycombinator.com/item?id=49093431",
+      "author": "lhd1",
+      "voiceId": "hackernews:user:lhd1",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49094852",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "I'll be more blunt than other commenters: this is useless. Obsidian and plenty of other note taking apps already do the same and more.\nAdd to that the fact that it's likely entirely vibe-coded, there's really 0 value proposition here.",
+      "url": "https://news.ycombinator.com/item?id=49094852",
+      "author": "iLoveOncall",
+      "voiceId": "hackernews:user:iloveoncall",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49096968",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "There are also a lot of mcp agents for Joplin: https://discourse.joplinapp.org/t/ai-agents-and-joplin/46168\nDare I say, another, more popular, note taking app for you and your agents.\nI really like it as I run a webdav service and can read/write and sync notes between multiple Mac desktops and Android. Encrypted while I am at it.\nMarkdown native.",
+      "url": "https://news.ycombinator.com/item?id=49096968",
+      "author": "mianos",
+      "voiceId": "hackernews:user:mianos",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49097196",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Hubble: Open-source notetaking app for you and your agents",
+      "body": "Oh look, a new note taking app. Must be Wednesday.",
+      "url": "https://news.ycombinator.com/item?id=49097196",
+      "author": "pickleglitch",
+      "voiceId": "hackernews:user:pickleglitch",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49091730",
+      "threadId": "hn:story:49091730",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49101628",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Show HN: Echologue – the private AI voice journal I built for myself",
+      "body": "I agree with you about the merits of journaling, but I think there is a place for this kind of app still. I don't use this specific app, but I like the idea of a single dumping ground that is sorted and reviewed by AI, but not necessarily for emotional journaling but for a form of data tracking. I mean I do sometimes track my emotions, but I don't ask AI to tell me how I'm doing, though I do ask it if there are any notes that keep popping up and they might be something I need to work on. It's also helpful for managing tasks as someone with ADHD. I don't have to think about sorting notes before I even write them. I still like to journal by hand. My note taking apps aren't replacements for them. They're more for research and data tracking really. I also think it is cool to have historical data around the things you do in general. And voice can be such a frictionless ux. Idk, I see the appeal!",
+      "url": "https://news.ycombinator.com/item?id=49101628",
+      "author": "steezeburger",
+      "voiceId": "hackernews:user:steezeburger",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49096767",
+      "threadId": "hn:story:49096767",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49104084",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "CherryTree Note Taker App",
+      "body": "After trying many note taking apps I am liking the CherryTree software. Linux/Windows/$0\nI like the look and feel.\nControl-Shift F is the best way to search within your files. Once I used that instead of just Control-F I was 100% happy with it.\nData files not in the cloud.",
+      "url": "https://news.ycombinator.com/item?id=49104084",
+      "author": "theMezz",
+      "voiceId": "hackernews:user:themezz",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-29",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49104083",
+      "threadId": "hn:story:49104083",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "gh:issue:5018755215",
+      "source": "github",
+      "kind": "issue",
+      "title": "\"Labels\" not displayed in an alphabetical order in NotallyX.",
+      "body": "Hi, your app (**NotallyX**) is working perfectly, except that _Notally'_s very valuable feature, viz., the **alphabetical display of the Labels** (categories), is missing in NotallyX. I hope you will add it in your next updated version.\n\nThank you for such an excellent work. (Even \"AIs\" have noticed it in the list of popular off-line (own your data) note-taking apps. fyi.)\n\nCheers.\n\nJun",
+      "url": "https://github.com/Crustack/NotallyX/issues/1076",
+      "author": "junpespina",
+      "voiceId": "github:user:junpespina",
+      "container": "Crustack/NotallyX",
+      "publishedAt": "2026-07-30",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:5018755215",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "gh:issue:5025337629",
+      "source": "github",
+      "kind": "issue",
+      "title": "[Feature request] App & Web Client Lock Screen (PIN / Biometrics / Auto-lock)",
+      "body": "## Description\n\nI really enjoy using this note-taking app across mobile apps and web clients. To better protect private notes, I would like to request a security lock feature with the following capabilities:\n\n### Login authentication options\nPIN code lock\nBiometric unlock (fingerprint / Face ID) for mobile applications\n### Auto-lock mechanism\nAutomatically lock the app after a period of inactivity (customizable idle timeout)\nOptional: Lock immediately when the app goes to background\n### Cross-platform expectation\nMobile App (iOS / Android): Support PIN + biometrics + auto idle lock\nWeb Client: Support PIN lock (web biometrics/WebAuthn can be considered as an advanced option)\nBasic behavior\nAfter locking, all note content shall be hidden; users must complete verification to view notes again\n\n## Use Case\nWhen I leave my phone or computer unattended, other people cannot browse my confidential notes without permission. This greatly improves data privacy.\n\n## Proposed Settings Panel (Reference)\nToggle: Enable Application Lock\nAuthentication method: PIN / Biometrics (if device supported)\nAuto-lock idle timer options: Immediately / 30s / 1min / 5min / 15min / Never\nToggle: Lock when app loses focus / enters background\n\n## Additional context\nMany mainstream note applications provide similar security features, which is essential for users storing sensitive personal information. Thank you for considering this feature!",
+      "url": "https://github.com/ZhFahim/anchor/issues/140",
+      "author": "mcxiaoke",
+      "voiceId": "github:user:mcxiaoke",
+      "container": "ZhFahim/anchor",
+      "publishedAt": "2026-07-31",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:5025337629",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:49125721",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Show HN: A local memory of all you have seen, said or heard while you work",
+      "body": "Interesting... How a tool would need to look like for you to use in your industry? Have you looked for note-taking apps before? If yes, why you didn't stick w them?",
+      "url": "https://news.ycombinator.com/item?id=49125721",
+      "author": "rafaepta",
+      "voiceId": "hackernews:user:rafaepta",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-07-31",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49125058",
+      "threadId": "hn:story:49125058",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49130811",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Software for One",
+      "body": "Things I've built in the last month or so:\n* A personal music player for Apple Music with an embedded agent loop, so I can say things like \"I'm going to work in the wood shop, play woodworking-appropriate music and keep the playlist full and non-repeating indefinitely\".\n* A calorie/protein tracker that takes 1-liner summaries of meals, resolves them to macros with GPT5 calls, and tracks them in SQLite.\n* A macOS menubar combined Apple TV and Roku TV remote control.\n* A calculator front-end to SageMath that renders Latex math notation and has point/click shortcut affordances for linear algebra and MVC.\n* A \"self driving wiki\" macOS desktop llmwiki that imports and digests PDFs.\n* A menubar tracker for the little temperature sensors I have scattered all throughout the house so I can click my menubar and instantly see the temps in the different rooms of the house.\n* A layout tool for designing picture frames to get cut lists and rabbet depths and stuff.\nThat's just the desktop stuff. These applications are generally better than what I'd get from the App Store. The calorie tracker is one of the better-designed apps on my dock.\nI feel like I'm not doing this enough yet, it hasn't fully sunk in, and I'm going to be building a lot more stuff when it does sink in. I haven't yet gotten to the point of writing my own note-taking application (still Bear.app for that), but how long can that last?",
+      "url": "https://news.ycombinator.com/item?id=49130811",
+      "author": "tptacek",
+      "voiceId": "hackernews:user:tptacek",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-01",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49096605",
+      "threadId": "hn:story:49096605",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49132165",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Software for One",
+      "body": "Same thoughts here.\nAbout four years ago I started building an RSS reader that was supposed to use an algorithm. The problem is, I didn't code in years and wasn't familiar with the modern web stack. I had to drop it, although was still able to sell the domain I got for $500 (nice).\nAnd then, with Codex and Claude, I finally built it this year and enjoy it every day, along with 30 other strangers, since I made it public. It's a great feeling.\nI now finally have an app that I use to save both links and articles to read, sort of in-between of Readwise Reader and Raindrop (and it does sync with Readwise).\nI write my blog posts in a little browser-based note-taking app with sharing. It's minimal and looks great but has all I need.\nI built a few Chrome extensions that I really wanted but couldn't find (well, couldn't find beautiful options).\nI don't think everyone will do this. And getting the audience is a major pain, always has been, but now most of your early adopters just go and build their own things just like you. I'll still take it.",
+      "url": "https://news.ycombinator.com/item?id=49132165",
+      "author": "ymolodtsov",
+      "voiceId": "hackernews:user:ymolodtsov",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-01",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49096605",
+      "threadId": "hn:story:49096605",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49134382",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Software for One",
+      "body": "> I feel like I'm not doing this enough yet, it hasn't fully sunk in, and I'm going to be building a lot more stuff when it does sink in. I haven't yet gotten to the point of writing my own note-taking application (still Bear.app for that), but how long can that last?\nIndeed.\nI'm not sure when, but at some point after I saw Claude Code, I realised what I wanted for my next OS was basically an LCARS-themed* thing, where the \"desktop\" is a TUI and whenever I needed an app I didn't already have, I'd ask an LLM to write it for me instead of downloading it (benefit: the app would never have an update pending (which might break my flow) that I had to install before use, unless I'd specifically asked for a new feature to be written); and if I wanted to browse something on the web, the browser would use something like an LLM to strip out everything that wasn't content.\nLLMs aren't quite good enough for that yet. They're interesting, I've also made a bunch of apps this way that was an easier experience than even figuring out which offering on the app store was right for me**, but still, the LLMs are not quite good enough; I'm pining for the OS equivalent of a car with a self-driving mode so good there's no steering wheel and the windows have black-out shutters so you can sleep while it drives you and your insurance is fine with this.\n* because I'm that kind of nerd\n** e.g. rhythm action game that takes midi files for the songs and listens for a midi keyboard for your input: https://benwheatley.github.io/Piano-Trainer/piano-trainer.ht...",
+      "url": "https://news.ycombinator.com/item?id=49134382",
+      "author": "ben_w",
+      "voiceId": "hackernews:user:ben_w",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-01",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49096605",
+      "threadId": "hn:story:49096605",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "gh:issue:5044978660",
+      "source": "github",
+      "kind": "issue",
+      "title": "autocorrect doesn't work in some specific apps for some reason",
+      "body": "I was using Instagram DM's when I noticed my autocorrect isn't working at all (I was typing in English, if that's important). The word suggestion field also stayed empty, which was very weird, since it's usually full of suggestions and corrections. I took logs right after that, which I attach here.\n\n[LeanType_log_2026-08-03_04-12-53.txt](https://github.com/user-attachments/files/30640283/LeanType_log_2026-08-03_04-12-53.txt)\n\nsame error also happens in Google Keep (a note taking app).\naggressive autocorrect is on.\n\"more autocorrect\" (which enables autocorrect even in text fields where it shouldn't be enabled) is also on.\nautocorrect works just fine in DM's from other apps, like Discord. I'm not sure why is it Instagram DM's and Google Keep in specific.\n\nthe app version is v4.0.6, offline-lite.\nthe phone is Google Pixel 9a with GrapheneOS (Android 17).",
+      "url": "https://github.com/LeanBitLab/LeanType/issues/389",
+      "author": "blind-confused",
+      "voiceId": "github:user:blind-confused",
+      "container": "LeanBitLab/LeanType",
+      "publishedAt": "2026-08-02",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:5044978660",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:49142268",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "[dead]",
+      "body": "Among today’s links are markdown editors Editorial and SiYuan, Eziwiki, a lightweight wiki generator, KovaMD, a presentation app, and Agenda, a note-taking app tied to your calendar\n#markdown #markdowneditors #opensource #wikis #staticsitegenerators #Editorial #SiYuan #Eziwiki #KovaMD #Agenda",
+      "url": "https://news.ycombinator.com/item?id=49142268",
+      "author": "wordius",
+      "voiceId": "hackernews:user:wordius",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-02",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49142267",
+      "threadId": "hn:story:49142267",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49147562",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "SwiftUI After 7 Years",
+      "body": "I know people would dismiss this, but I'm going to try to make the case for Qt - I'm currently converting my note-taking app to mobile and it's going very well.",
+      "url": "https://news.ycombinator.com/item?id=49147562",
+      "author": "rubymamis",
+      "voiceId": "hackernews:user:rubymamis",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-02",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49147263",
+      "threadId": "hn:story:49147263",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49149190",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": "Asking \"what have note-taking apps accomplished?\" is like asking \"what have spreadsheets accomplished?\" or \"what have cameras accomplished?\". A tool doesn't accomplish anything on its own. A tool is a means to an end.\nA few days ago, someone jokingly asked if Henry Ford had a personal knowledge base in Obsidian... Well, sort of! He had something he called \"jot books\", where he journaled, kept notes, grocery lists, etc. Not dissimilar to how people use Obsidian. The Henry Ford Museum has fifty of these notebooks: https://www.thehenryford.org/search?Query=%22jot+book%22\nHow should we quantify the impact of Henry Ford's notebooks? How should we quantify the impact of spreadsheets?\nMost people who accomplish anything take notes in some form, because writing is a way of thinking. We love to mythologize the tools and methods of accomplished people because we hope it will let us absorb a bit of their genius. But a good camera doesn't make a good photographer. Taking lots of photos helps.\nShould you take notes? Probably. Does it matter what your method is? Probably not. Whatever works for you. Obsidian (or any other form of notetaking) is successful if it disappears and lets you accomplish your work.",
+      "url": "https://news.ycombinator.com/item?id=49149190",
+      "author": "kepano",
+      "voiceId": "hackernews:user:kepano",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-02",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "gh:issue:5046340683",
+      "source": "github",
+      "kind": "issue",
+      "title": "Qwen Drops Weights, Frogs Judge AI, SSH Is a Canvas",
+      "body": "## Qwen drops weights, frogs judge AI, and HN discovers ssh is a canvas\n\n**Highlights:**\n- Qwen 3.8-Max: open weights coming, benchmarks probably rigged\n- Habsburg frog SVG: the AI benchmark we deserve\n- ssh.place: r/place but you have to know what a terminal is\n\n---\n\n### [Qwen3.8-Max: A New Bar for Coding and Cowork](https://news.ycombinator.com/item?id=49150470)\n**181 pts | 72 comments**\n\nAlibaba's Qwen team announces Qwen 3.8-Max, their most capable model yet. They're also releasing open weights for a Max-class model for the first time, with the 27B version dropping next week.\n\n*Take: The open weights announcement is the real news here. Qwen 3.6-27B was already punching above its weight class locally, so if 3.8 delivers, the self-hosted crowd just got early Christmas.*\n\n---\n\n### [My personal AI benchmark: 'Generate an SVG of a frog with a Habsburg jaw'](https://news.ycombinator.com/item?id=49147622)\n**122 pts | 56 comments**\n\nSomeone built a website testing frontier LLMs on generating an SVG of a frog with a Habsburg jaw. Most models draw a frog and a separate jaw blob. Opus 5 came closest. Fable 5 apparently nailed it.\n\n*Take: This is the kind of benchmark the AI safety crowd should be running instead of asking models if they'd launch nukes. If you can't draw an inbred amphibian, you definitely can't take over the world.*\n\n---\n\n### [Note-Taking and Personal Knowledge Management](https://news.ycombinator.com/item?id=49084324)\n**156 pts | 45 comments**\n\nA critical look at the PKM/second-brain movement. The author questions what note-taking apps have actually accomplished.\n\n*Take: The PKM industrial complex has convinced a generation that their note-taking system is the bottleneck, not their actual thinking. Meanwhile, the Obsidian founder had to pop in and remind everyone that Henry Ford essentially had a personal knowledge base too.*\n\n---\n\n### [Show HN: ssh ssh.place](https://news.ycombinator.com/item?id=49149805)\n**66 pts | 31 comments**\n\nAn r/place-style collaborative pixel canvas, but you access it via SSH. Just run 'ssh ssh.place' and you're in. Users are already coordinating factions.\n\n*Take: This is peak HN: taking a wildly accessible web concept and gating it behind a terminal command, thus ensuring only the true nerds can participate in drawing pixel art.*\n\n---\n\n### [Show HN: Isopolis – Isometric pixel map of SF](https://news.ycombinator.com/item?id=49149966)\n**105 pts | 26 comments**\n\nAn isometric pixel art rendering of San Francisco, generated from Google's 3D Tiles using a fine-tuned image model. The creator used Claude Code to build the scraper in under 30 minutes.\n\n*Take: The fact that Claude Code whipped up the tile scraper faster than most devs could read the API docs says something about either the state of documentation or the state of developers. Probably both.*\n\n---\n\n🤖 Generated with [Claude Code](https://claude.ai/code)",
+      "url": "https://github.com/thevibeworks/claude-reads-hn/issues/1471",
+      "author": "claude-yolo[bot]",
+      "voiceId": "github:user:claude-yolo[bot]",
+      "container": "thevibeworks/claude-reads-hn",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": null,
+      "threadId": "gh:issue:5046340683",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 reactions · 86th percentile of github items in this run",
+      "engagementPercentile": 0.8571428571428571
+    },
+    {
+      "id": "hn:comment:49150855",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": "Feom https://brennan.day/what-have-note-taking-pkms-accomplished-...:\n\"German sociologist Niklas Luhmann, as he was famous for his use of the \"slip box\" or Zettelkasten note-taking method and the achieved output of more than 70 books and nearly 400 scholarly articles. This is the kind of remarkable output that many in the PKM community aspire towards.\"\nI think that is somehwhat misguided. The goal shouldn't be great quantity of output, but great quality.\nI think AI has revealed that to us in reccent years.  AI can produce endless output. But who needs it, what is it good for? Unless we have a GOOD QUESTION to AI, it's output is not very valuable.\nThese note-taking apps, you write a lot of notes, but is there an overarching question the notes are meant to answer? Depends on how you use them of course. But I would guess that most of the notes are more \"Good to Haves\" than \"Step towards a definite goal\".\nMost notes don't  probabaly take you closer to the end-goal of your project. You just think they might become useful in the future, so you write them down. Just in case. To feel you are taking good care of your precious ideas. But how much time are you eilling to spend to read them in the future?",
+      "url": "https://news.ycombinator.com/item?id=49150855",
+      "author": "galaxyLogic",
+      "voiceId": "hackernews:user:galaxylogic",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49153616",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": ">Asking \"what have note-taking apps accomplished?\" is like asking \"what have spreadsheets accomplished?\" or \"what have cameras accomplished?\". A tool doesn't accomplish anything on its own. A tool is a means to an end.\nYes, but, the _shape_ of something does offer affordances of what it makes easier or harder to do. So \"obsidian\" vs \"saving files on my computer\" does seem to be a legitimate question.",
+      "url": "https://news.ycombinator.com/item?id=49153616",
+      "author": "voiper1",
+      "voiceId": "hackernews:user:voiper1",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49153857",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": "From that perspective Org mode offers everything every other note taking app does.\nExcept a nice interface. Except syncing between devices. Except cloud backups. Except third party data breaches. Except paid support contracts.",
+      "url": "https://news.ycombinator.com/item?id=49153857",
+      "author": "dotancohen",
+      "voiceId": "hackernews:user:dotancohen",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49154389",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": "I used Joplin, Sphinx doc for many years ago, but I don't use them recently.\nI found they are too complicated, bloated, not easy to organize notes, not easy to access across devices, not flexible, no manual sorting, etc.\nI like simple, concise, flexible and practical note-taking or bookmark management app. So I have created my own note-taking app Metaessen [1] for 2+ years.\nNow I am just using my own app and pure text for bookmarks and notes.\nLife is short, no necessary to use too complicated softwares.\n[1] https://metaessen.com/",
+      "url": "https://news.ycombinator.com/item?id=49154389",
+      "author": "lilerjee",
+      "voiceId": "hackernews:user:lilerjee",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    },
+    {
+      "id": "hn:comment:49156570",
+      "source": "hackernews",
+      "kind": "comment",
+      "title": "Note-Taking and Personal Knowledge Management",
+      "body": "> Asking \"what have note-taking apps accomplished?\" is like asking \"what have spreadsheets accomplished?\" or \"what have cameras accomplished?\"\nI think you have to be somewhat careful with this line of reasoning - the camera put the portrait artist out of business pretty much permanently, and the spreadsheet had similarly cataclysmic effects on the accounting and engineering professions.\nJust because these things are tools, doesn't mean they can't distort the world by their very presence. I'd be hard pressed to put my finger on the distortion caused by obsidian et al",
+      "url": "https://news.ycombinator.com/item?id=49156570",
+      "author": "swiftcoder",
+      "voiceId": "hackernews:user:swiftcoder",
+      "container": "news.ycombinator.com",
+      "publishedAt": "2026-08-03",
+      "dateConfidence": "high",
+      "engagement": {
+        "primary": 0,
+        "comments": 0
+      },
+      "parentId": "hn:story:49084324",
+      "threadId": "hn:story:49084324",
+      "duplicateOf": null,
+      "dedupeReason": null,
+      "inWindow": true,
+      "engagementText": "0 points · 77th percentile of hackernews items in this run",
+      "engagementPercentile": 0.7692307692307693
+    }
+  ],
+  "halted": false,
+  "haltReason": null,
+  "extraction": {
+    "itemsConsidered": 70,
+    "batches": 7,
+    "returned": 37,
+    "rejectedUnverifiedQuote": 2,
+    "rejectedUnknownId": 0,
+    "failedBatches": 0,
+    "accepted": 35,
+    "rejectionRate": 0.05405405405405406
+  },
+  "themeStats": {
+    "inputGroups": 35,
+    "merged": 2,
+    "rejectedUnknownIndex": 0,
+    "rejectedDuplicateIndex": 0,
+    "failed": false,
+    "outputGroups": 33
+  },
+  "opportunities": [],
+  "weakSignals": [
+    {
+      "id": "cluster-17",
+      "label": "Proprietary data lock-in",
+      "themed": true,
+      "mergedFrom": [
+        "Notion and NotebookLM trap user data in cloud",
+        "Note-taking apps lock data in proprietary databases"
+      ],
+      "members": [
+        {
+          "evidenceId": "hn:story:48968447",
+          "pain": "Notion and NotebookLM trap user data in cloud",
+          "quote": "Your data is trapped in their cloud.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:chirag",
+          "threadId": "hn:story:48968447",
+          "publishedAt": "2026-07-19",
+          "joinedAt": 1
+        },
+        {
+          "evidenceId": "hn:comment:48869558",
+          "pain": "Note-taking apps lock data in proprietary databases",
+          "quote": "Note taking app that keeps the data in their db and not your files - ain't your friend.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ilemming",
+          "threadId": "hn:story:48858121",
+          "publishedAt": "2026-07-11",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 2,
+      "distinctVoices": 2,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.4283173410313946,
+        "reach": 0.7788461538461539,
+        "recency": 0.30984108912037034,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.46017495859503094,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-14",
+      "label": "Data portability between apps",
+      "themed": true,
+      "mergedFrom": [
+        "Cannot import notes from other note-taking apps",
+        "Search is poor and export is intentionally difficult"
+      ],
+      "members": [
+        {
+          "evidenceId": "gh:issue:4982454177",
+          "pain": "Cannot import notes from other note-taking apps",
+          "quote": "I cannot import notes from other apps.",
+          "severity": "mentioned",
+          "source": "github",
+          "voiceId": "github:user:ruben1pvp",
+          "threadId": "gh:issue:4982454177",
+          "publishedAt": "2026-07-26",
+          "joinedAt": 1
+        },
+        {
+          "evidenceId": "hn:comment:48869558",
+          "pain": "Search is poor and export is intentionally difficult",
+          "quote": "Information gets buried in threads, search is mediocre, export is hostile.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ilemming",
+          "threadId": "hn:story:48858121",
+          "publishedAt": "2026-07-11",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 2,
+      "distinctVoices": 2,
+      "sourceTypes": [
+        "github",
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.4283173410313946,
+        "reach": 0.848901098901099,
+        "recency": 0.42650775540123453,
+        "sourceDiversity": 0.6666666666666666,
+        "severity": 0.25
+      },
+      "score": 0.55102202811494,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-1",
+      "label": "Note-taking apps too complex, bloated, hard to organize",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49154389",
+          "pain": "Note-taking apps too complex, bloated, hard to organize",
+          "quote": "I found they are too complicated, bloated, not easy to organize notes, not easy to access across devices, not flexible, no manual sorting, etc.",
+          "severity": "blocked",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:lilerjee",
+          "threadId": "hn:story:49084324",
+          "publishedAt": "2026-08-03",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.9431744220679013,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.85
+      },
+      "score": 0.5970140230494685,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-2",
+      "label": "Autocorrect malfunction in specific applications",
+      "members": [
+        {
+          "evidenceId": "gh:issue:5044978660",
+          "pain": "Autocorrect malfunction in specific applications",
+          "quote": "autocorrect doesn't work in some specific apps for some reason",
+          "severity": "blocked",
+          "source": "github",
+          "voiceId": "github:user:blind-confused",
+          "threadId": "gh:issue:5044978660",
+          "publishedAt": "2026-08-02",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.9098410887345679,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.85
+      },
+      "score": 0.6123253783608238,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-3",
+      "label": "Community AI plugins in Obsidian/Logseq break during updates",
+      "members": [
+        {
+          "evidenceId": "hn:story:48968447",
+          "pain": "Community AI plugins in Obsidian/Logseq break during updates",
+          "quote": "They require duct-taping together fragile community AI plugins that break during updates.",
+          "severity": "workaround",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:chirag",
+          "threadId": "hn:story:48968447",
+          "publishedAt": "2026-07-19",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7884615384615384,
+        "recency": 0.44317442206790125,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.5
+      },
+      "score": 0.46682171535716077,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-4",
+      "label": "Stylus latency and stroke choppiness on iPad",
+      "members": [
+        {
+          "evidenceId": "gh:issue:4911132647",
+          "pain": "Stylus latency and stroke choppiness on iPad",
+          "quote": "When drawing or handwriting in Excalidraw on iPad, strokes feel delayed and visually choppy compared to native note-taking apps like Goodnotes or Apple Notes.",
+          "severity": "workaround",
+          "source": "github",
+          "voiceId": "github:user:lennymalcolm0",
+          "threadId": "gh:issue:4911132647",
+          "publishedAt": "2026-07-17",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.3765077554012346,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.5
+      },
+      "score": 0.47065871169415713,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-5",
+      "label": "Manual copying to external apps interrupts workflow",
+      "members": [
+        {
+          "evidenceId": "gh:issue:4842749930",
+          "pain": "Manual copying to external apps interrupts workflow",
+          "quote": "Currently, users must take screenshots or manually copy important responses into external applications like Google Docs or Notion, which is time-consuming and interrupts the learning workflow.",
+          "severity": "workaround",
+          "source": "github",
+          "voiceId": "github:user:kolasailaja",
+          "threadId": "gh:issue:4842749930",
+          "publishedAt": "2026-07-09",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.10984108834876549,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.5
+      },
+      "score": 0.4173253782836633,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-6",
+      "label": "Org mode lacks graphical user interface",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49153857",
+          "pain": "Org mode lacks graphical user interface",
+          "quote": "Except a nice interface.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:dotancohen",
+          "threadId": "hn:story:49084324",
+          "publishedAt": "2026-08-03",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.9431744216820988,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.537014022972308,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-7",
+      "label": "Org mode cannot synchronize between devices",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49153857",
+          "pain": "Org mode cannot synchronize between devices",
+          "quote": "Except syncing between devices.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:dotancohen",
+          "threadId": "hn:story:49084324",
+          "publishedAt": "2026-08-03",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.9431744216820988,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.537014022972308,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-8",
+      "label": "Org mode has no cloud backup capability",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49153857",
+          "pain": "Org mode has no cloud backup capability",
+          "quote": "Except cloud backups.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:dotancohen",
+          "threadId": "hn:story:49084324",
+          "publishedAt": "2026-08-03",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.9431744216820988,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.537014022972308,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-9",
+      "label": "No security lock or access controls",
+      "members": [
+        {
+          "evidenceId": "gh:issue:5025337629",
+          "pain": "No security lock or access controls",
+          "quote": "To better protect private notes, I would like to request a security lock feature with the following capabilities:",
+          "severity": "mentioned",
+          "source": "github",
+          "voiceId": "github:user:mcxiaoke",
+          "threadId": "gh:issue:5025337629",
+          "publishedAt": "2026-07-31",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.8431744216820988,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.53899204495033,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-10",
+      "label": "Can't use Claude subscription in third-party apps",
+      "members": [
+        {
+          "evidenceId": "gh:issue:5009614300",
+          "pain": "Can't use Claude subscription in third-party apps",
+          "quote": "When asked whether the same could be done with a Claude subscription, Heptabase's founder confirmed this isn't possible today, specifically because Claude's Pro/Max OAuth credential is restricted to Claude Code and claude.ai per Anthropic's terms",
+          "severity": "mentioned",
+          "source": "github",
+          "voiceId": "github:user:helmet-png",
+          "threadId": "gh:issue:5009614300",
+          "publishedAt": "2026-07-29",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.7765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.5256587116169967,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-11",
+      "label": "Unclear value proposition for new note app",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49092157",
+          "pain": "Unclear value proposition for new note app",
+          "quote": "I feel like there's not enough content on the landing page to help me understand why I need yet another notetaking app. The burden of proof is high given how many of these there are.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:flippyhead",
+          "threadId": "hn:story:49091730",
+          "publishedAt": "2026-07-29",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.7765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.5036806896389746,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-12",
+      "label": "Lacks differentiation versus existing note apps",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49094852",
+          "pain": "Lacks differentiation versus existing note apps",
+          "quote": "Obsidian and plenty of other note taking apps already do the same and more.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:iloveoncall",
+          "threadId": "hn:story:49091730",
+          "publishedAt": "2026-07-29",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.7765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.5036806896389746,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-13",
+      "label": "Dock icon visibility clutters workspace",
+      "members": [
+        {
+          "evidenceId": "gh:issue:4988873556",
+          "pain": "Dock icon visibility clutters workspace",
+          "quote": "having the app icon always visible in my dock clutters my workspace",
+          "severity": "mentioned",
+          "source": "github",
+          "voiceId": "github:user:dishanagalawatta",
+          "threadId": "gh:issue:4988873556",
+          "publishedAt": "2026-07-27",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.7098410883487654,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.5123253782836632,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-15",
+      "label": "Note-taking apps consume excessive memory and have slow click response",
+      "members": [
+        {
+          "evidenceId": "hn:comment:49022864",
+          "pain": "Note-taking apps consume excessive memory and have slow click response",
+          "quote": "It could make a simple note-taking app not take gigabytes of memory and take visible delay on each click.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:smsm42",
+          "threadId": "hn:story:49010345",
+          "publishedAt": "2026-07-23",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.576507755015432,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4636806896389747,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-16",
+      "label": "SaaS note-taking apps lock users into subscription model",
+      "members": [
+        {
+          "evidenceId": "hn:story:48968447",
+          "pain": "SaaS note-taking apps lock users into subscription model",
+          "quote": "I don't want my second brain held hostage by a monthly subscription, and I don't want it locked in a proprietary database.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:chirag",
+          "threadId": "hn:story:48968447",
+          "publishedAt": "2026-07-19",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7884615384615384,
+        "recency": 0.44317442168209875,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4418217152800003,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-18",
+      "label": "Local RAG tools feel heavy and hide data opaquely",
+      "members": [
+        {
+          "evidenceId": "hn:story:48968447",
+          "pain": "Local RAG tools feel heavy and hide data opaquely",
+          "quote": "They feel like heavy developer tools and hide your data in opaque vector databases rather than clean, portable files.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:chirag",
+          "threadId": "hn:story:48968447",
+          "publishedAt": "2026-07-19",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7884615384615384,
+        "recency": 0.44317442168209875,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4418217152800003,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-19",
+      "label": "note services risk leaking data in breach",
+      "members": [
+        {
+          "evidenceId": "hn:story:48946288",
+          "pain": "note services risk leaking data in breach",
+          "quote": "could leak my data in the event of a security breach",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:gfrancv",
+          "threadId": "hn:story:48946288",
+          "publishedAt": "2026-07-17",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8269230769230769,
+        "recency": 0.3765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4381037665620516,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-20",
+      "label": "note services can revoke user access",
+      "members": [
+        {
+          "evidenceId": "hn:story:48946288",
+          "pain": "note services can revoke user access",
+          "quote": "revoke my access if I wanted to use it tomorrow",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:gfrancv",
+          "threadId": "hn:story:48946288",
+          "publishedAt": "2026-07-17",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8269230769230769,
+        "recency": 0.3765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4381037665620516,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-21",
+      "label": "deceptive note-taking app with wallet scam scheme",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48906548",
+          "pain": "deceptive note-taking app with wallet scam scheme",
+          "quote": "Search right now in the App Store for \"Morpho\" and you'll find a \"Morpho: Network\" app. That app says it's some sort of TODO/Note taking app. It uses very broad language in the screenshots and assets from morpho.org (a decentralized protocol). Once you open the app, it immediately downloads another bundle using OTA updates and shows an entirely different app where you \"connect your wallet\". You can imagine what happens next.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ftchd",
+          "threadId": "hn:story:48869989",
+          "publishedAt": "2026-07-14",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.2765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4036806896389747,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-22",
+      "label": "difficult maintaining consistent tag hierarchies",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48913515",
+          "pain": "difficult maintaining consistent tag hierarchies",
+          "quote": "tags/models hierarchies are hard to build and keep consistent/up to date",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ezst",
+          "threadId": "hn:story:48896229",
+          "publishedAt": "2026-07-14",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.2765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4036806896389747,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-23",
+      "label": "ambiguous block structure loses context and findability",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48913515",
+          "pain": "ambiguous block structure loses context and findability",
+          "quote": "there is always the duality between embedding and referring because sometimes a sub-block is a block, and that forces you into defining more types or risk losing context and not being able to find the note but by name, if you can even remember it, etc",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ezst",
+          "threadId": "hn:story:48896229",
+          "publishedAt": "2026-07-14",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.2765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4036806896389747,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-24",
+      "label": "outliner becomes exhausting as PKMS grows",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48913515",
+          "pain": "outliner becomes exhausting as PKMS grows",
+          "quote": "I find it exhausting to use over time/as the PKMS grows.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:ezst",
+          "threadId": "hn:story:48896229",
+          "publishedAt": "2026-07-14",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.2765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.4036806896389747,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-25",
+      "label": "finding app with pen variety and lecture ease",
+      "members": [
+        {
+          "evidenceId": "reddit:post:R3",
+          "pain": "finding app with pen variety and lecture ease",
+          "quote": "i just want good features which means diff types of pens and pages and ease of taking my psych notes in lectures.",
+          "severity": "mentioned",
+          "source": "reddit",
+          "voiceId": "reddit:item:https://reddit.com/r/ipad/comments/1uw4wba/best_note_taking_apps",
+          "threadId": "reddit:post:R3",
+          "publishedAt": "2026-07-14",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "reddit"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.5,
+        "recency": 0.2765077550154321,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.33637299733128234,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-26",
+      "label": "lousy note-taking ability",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48885699",
+          "pain": "lousy note-taking ability",
+          "quote": "I've always been a lousy notetaker, even going back to my school days years ago.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:joshuawertheim",
+          "threadId": "hn:story:48884984",
+          "publishedAt": "2026-07-12",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.20984108834876547,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.3903473563056414,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-27",
+      "label": "notes not detailed enough to revisit",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48885699",
+          "pain": "notes not detailed enough to revisit",
+          "quote": "but tend to not flesh them out fully enough to make them worth re-visiting.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:joshuawertheim",
+          "threadId": "hn:story:48884984",
+          "publishedAt": "2026-07-12",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.20984108834876547,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.3903473563056414,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-28",
+      "label": "struggle taking notes in meetings and ramping up",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48885699",
+          "pain": "struggle taking notes in meetings and ramping up",
+          "quote": "This has been a struggle even as an engineer sitting in meetings or trying to absorb new information when starting a new job and ramping up.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:joshuawertheim",
+          "threadId": "hn:story:48884984",
+          "publishedAt": "2026-07-12",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.20984108834876547,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.3903473563056414,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-31",
+      "label": "Finding previous responses difficult in long conversations",
+      "members": [
+        {
+          "evidenceId": "gh:issue:4842749930",
+          "pain": "Finding previous responses difficult in long conversations",
+          "quote": "Students often receive valuable explanations from the AI Tutor that they want to revisit later. As conversations grow longer, finding previously answered doubts becomes difficult, making revision less efficient.",
+          "severity": "mentioned",
+          "source": "github",
+          "voiceId": "github:user:kolasailaja",
+          "threadId": "gh:issue:4842749930",
+          "publishedAt": "2026-07-09",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "github"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8571428571428571,
+        "recency": 0.10984108834876549,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.3923253782836633,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-32",
+      "label": "Note-taking apps charge excessive subscription prices",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48850573",
+          "pain": "Note-taking apps charge excessive subscription prices",
+          "quote": "Charging $20,000 for a note-taking app subscription is not that.",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:rpdillon",
+          "threadId": "hn:story:48799966",
+          "publishedAt": "2026-07-09",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.10984108834876549,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.37034735630564136,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-33",
+      "label": "Apps stagnate while becoming harder and more expensive",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48850573",
+          "pain": "Apps stagnate while becoming harder and more expensive",
+          "quote": "what they're consistently doing is stagnating on any kind of feature development, making the apps and sites more difficult to use and have more nags, and they're increasing prices",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:rpdillon",
+          "threadId": "hn:story:48799966",
+          "publishedAt": "2026-07-09",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.10984108834876549,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.37034735630564136,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-34",
+      "label": "Note-taking apps have excessive friction in capturing thoughts",
+      "members": [
+        {
+          "evidenceId": "hn:story:48834432",
+          "pain": "Note-taking apps have excessive friction in capturing thoughts",
+          "quote": "Taking notes should be frictionless, but for me with most of the note apps, there are too much frictions to quickly put down what I have in my mind, before long forgetting what I was intending to write",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:t_mahmood",
+          "threadId": "hn:story:48834432",
+          "publishedAt": "2026-07-08",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.8269230769230769,
+        "recency": 0.07650775501543217,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.3781037665620516,
+      "qualifies": false
+    },
+    {
+      "id": "cluster-35",
+      "label": "AI companies misrepresent privacy and data handling",
+      "members": [
+        {
+          "evidenceId": "hn:comment:48823391",
+          "pain": "AI companies misrepresent privacy and data handling",
+          "quote": "the public is, at this point, used to AI companies blatantly lying about privacy, confidentiality, training sources, reuse of conversations and pricing",
+          "severity": "mentioned",
+          "source": "hackernews",
+          "voiceId": "hackernews:user:munk-a",
+          "threadId": "hn:story:48823024",
+          "publishedAt": "2026-07-07",
+          "joinedAt": 1
+        }
+      ],
+      "countedMentions": 1,
+      "distinctVoices": 1,
+      "sourceTypes": [
+        "hackernews"
+      ],
+      "components": {
+        "frequency": 0.27023815442731974,
+        "reach": 0.7692307692307693,
+        "recency": 0.04317442168209884,
+        "sourceDiversity": 0.3333333333333333,
+        "severity": 0.25
+      },
+      "score": 0.35701402297230805,
+      "qualifies": false
+    }
+  ],
+  "elapsedMs": 302511
+}

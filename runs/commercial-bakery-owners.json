@@ -1,0 +1,76 @@
+{
+  "market": "commercial bakery owners",
+  "generatedAt": "2026-08-04T17:01:07.071Z",
+  "windowDays": 30,
+  "weights": {
+    "frequency": 0.3,
+    "reach": 0.25,
+    "recency": 0.2,
+    "sourceDiversity": 0.15,
+    "severity": 0.1
+  },
+  "floor": {
+    "minDistinctVoices": 3,
+    "minSourceTypes": 2
+  },
+  "coverage": {
+    "verdict": "insufficient",
+    "totalInWindow": 0,
+    "contributingSources": 0,
+    "perSource": [
+      {
+        "source": "hackernews",
+        "label": "Hacker News",
+        "state": "no-results",
+        "degraded": false,
+        "itemsReturned": 0,
+        "itemsInWindow": 0,
+        "error": null
+      },
+      {
+        "source": "github",
+        "label": "GitHub",
+        "state": "no-results",
+        "degraded": false,
+        "itemsReturned": 0,
+        "itemsInWindow": 0,
+        "error": null
+      },
+      {
+        "source": "reddit",
+        "label": "Reddit",
+        "state": "rate-limited",
+        "degraded": true,
+        "itemsReturned": 0,
+        "itemsInWindow": 0,
+        "error": null
+      }
+    ],
+    "degradedSources": [
+      "Reddit"
+    ],
+    "thresholds": {
+      "insufficientBelow": 15,
+      "adequateAtOrAbove": 40,
+      "minSources": 2
+    },
+    "explanation": "Only 0 in-window items across 0 sources. Reddit, Hacker News, and GitHub are developer- and tech-community-skewed, and the people in this market most likely do not discuss their problems there. Any opportunities ranked from this little evidence would describe the sources, not the market. Reddit did not complete (rate-limited), so this count understates what may exist — absence of evidence from a failed source is not evidence of absence."
+  },
+  "dedupeStats": {
+    "url": 0,
+    "nearDuplicate": 0,
+    "crosspost": 0,
+    "syndication": 0,
+    "total": 0,
+    "unique": 0,
+    "duplicates": 0
+  },
+  "engagement": {},
+  "evidence": [],
+  "halted": true,
+  "haltReason": "insufficient-evidence",
+  "opportunities": [],
+  "weakSignals": [],
+  "extraction": null,
+  "elapsedMs": 3706
+}

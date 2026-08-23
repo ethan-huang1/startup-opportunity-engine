@@ -1,0 +1,21 @@
+{
+  "name": "startup-opportunity-engine",
+  "version": "1.0.0",
+  "description": "Evidence-backed startup opportunity discovery engine",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/",
+    "test:browser": "playwright test"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  },
+  "dependencies": {
+    "better-auth": "^1.7.1",
+    "pg": "^8.23.0"
+  }
+}
