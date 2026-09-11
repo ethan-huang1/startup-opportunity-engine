@@ -7,14 +7,16 @@
  */
 
 import { createServer } from 'node:http';
-import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { runPipeline } from './lib/pipeline.js';
-import { assessAnalysis } from './lib/analysis.js';
 import { auth } from './lib/auth.js';
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node';
+import { beginRun, failRun, saveRunResult, getReport, listMarkets, anyRunInProgress } from './lib/store.js';
+import { isAdminEmail, isAdminRoute, GENERATION_ENABLED, checkRateLimit } from './lib/access.js';
+import { isClaudeAvailable } from './lib/claude.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -70,8 +72,18 @@ function sendJson(response, status, payload) {
   response.end(body);
 }
 
-/** Streams a live run. Each pipeline stage emits an event the UI renders. */
-async function streamRun(market, request, response) {
+async function readJsonBody(request) {
+  const chunks = [];
+  for await (const chunk of request) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString('utf8');
+  return raw ? JSON.parse(raw) : {};
+}
+
+/**
+ * Streams a live run. Each pipeline stage emits an event the UI renders.
+ * `runId` is the row beginRun() already created — this only fills it in.
+ */
+async function streamRun(market, slug, runId, request, response) {
   response.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
     'Cache-Control': 'no-cache',
@@ -103,15 +115,25 @@ async function streamRun(market, request, response) {
   try {
     const report = await runPipeline(market, (event) => send('progress', event));
     // The run is finished and paid for either way, so cache it even if the
-    // client left — reopening the market should be instant rather than re-run.
-    await mkdir(RUNS_DIR, { recursive: true });
-    await writeFile(
-      join(RUNS_DIR, `${slugify(market)}.json`),
-      JSON.stringify(report, null, 2),
-    );
+    // client left — reopening the market should be instant rather than
+    // re-run. Local-only: Vercel's bundle filesystem is read-only, and Neon
+    // (below) is the only persistence that exists there.
+    if (!process.env.VERCEL) {
+      await mkdir(RUNS_DIR, { recursive: true });
+      await writeFile(join(RUNS_DIR, `${slug}.json`), JSON.stringify(report, null, 2));
+    }
+    try {
+      await saveRunResult(runId, report);
+    } catch (dbError) {
+      // The file cache above still has the result; don't fail the response
+      // over it, but the market must not stay stuck "analyzing" forever.
+      console.error(`[neon save failed] ${market}: ${dbError.message}`);
+      await failRun(runId, `Saved to disk but not to Neon: ${dbError.message}`);
+    }
     send('report', report);
   } catch (error) {
     console.error(`[run failed] ${market}: ${error.message}`);
+    await failRun(runId, error.message);
     send('failed', { message: error.message });
   } finally {
     clearInterval(heartbeat);
@@ -119,7 +141,12 @@ async function streamRun(market, request, response) {
   }
 }
 
-const server = createServer(async (request, response) => {
+/**
+ * The whole request-routing logic, exported so tests can call it directly
+ * (with a real ephemeral-port server, or fake request/response objects)
+ * without going through `node server.js`'s module-level `listen()`.
+ */
+export async function handleRequest(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
 
   if (url.pathname.startsWith('/api/auth/')) {
@@ -129,16 +156,46 @@ const server = createServer(async (request, response) => {
 
   // Every other API route needs a signed-in user; the page itself and its
   // static assets stay reachable so the login form can render.
+  let session = null;
   if (url.pathname.startsWith('/api/')) {
-    const session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
+    session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
     if (!session) {
       sendJson(response, 401, { error: 'Sign in required.' });
       return;
     }
+
+    // Research/generation and run-history are admin-only for now
+    // (SECURITY_AUDIT.md, Findings 1 and 4). /api/fixture stays open to any
+    // signed-in account — it's static sample data, not live research.
+    if (isAdminRoute(url.pathname) && !isAdminEmail(session.user.email)) {
+      sendJson(response, 403, { error: 'Admin access required.' });
+      return;
+    }
   }
 
-  if (url.pathname === '/api/run') {
-    const market = (url.searchParams.get('market') || '').trim();
+  // POST because this creates state and spends real LLM calls — unlike every
+  // other route here, it is not safe to repeat or to trigger from a plain
+  // link. Also the one route for an explicit refresh: a market that's
+  // already analyzed just calls this again, and the read routes below never
+  // see the new run until it finishes (see lib/store.js's getReport).
+  if (request.method === 'POST' && url.pathname === '/api/analyses') {
+    // Fail-closed kill switch: checked before anything that scrapes or makes
+    // an outbound request, not just before the LLM call.
+    if (!GENERATION_ENABLED) {
+      sendJson(response, 503, { error: 'Report generation is currently disabled.' });
+      return;
+    }
+    if (!(await isClaudeAvailable())) {
+      sendJson(response, 503, { error: 'Claude is unavailable in this environment.' });
+      return;
+    }
+    if (!checkRateLimit(session.user.email)) {
+      sendJson(response, 429, { error: 'Too many analysis requests — try again in a minute.' });
+      return;
+    }
+
+    const body = await readJsonBody(request).catch(() => null);
+    const market = (body?.market || '').trim();
     if (market.length < 3) {
       sendJson(response, 400, { error: 'Enter a market or customer group (at least 3 characters).' });
       return;
@@ -147,7 +204,22 @@ const server = createServer(async (request, response) => {
       sendJson(response, 400, { error: 'That query is too long — try naming the market more directly.' });
       return;
     }
-    await streamRun(market, request, response);
+
+    // Basic system-wide concurrency guard, on top of beginRun()'s atomic
+    // per-market claim below (see anyRunInProgress()'s own doc comment).
+    if (await anyRunInProgress()) {
+      sendJson(response, 429, { error: 'Another analysis is already running — try again shortly.' });
+      return;
+    }
+
+    const slug = slugify(market);
+    const claim = await beginRun(slug, market);
+    if (claim.status === 'already_analyzing') {
+      sendJson(response, 409, { error: 'already_analyzing', slug, runId: claim.runId });
+      return;
+    }
+
+    await streamRun(market, slug, claim.runId, request, response);
     return;
   }
 
@@ -164,68 +236,35 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  // Free reads: no LLM cost, backed entirely by Neon.
   if (url.pathname === '/api/runs') {
-    try {
-      const files = await readdir(RUNS_DIR);
-      const runs = await Promise.all(
-        files
-          .filter((name) => name.endsWith('.json'))
-          .map(async (name) => {
-            const report = JSON.parse(await readFile(join(RUNS_DIR, name), 'utf8'));
-            return {
-              slug: name.replace(/\.json$/, ''),
-              market: report.market,
-              generatedAt: report.generatedAt,
-              verdict: report.coverage?.verdict,
-              opportunities: report.opportunities?.length || 0,
-            };
-          }),
-      );
-      runs.sort((a, b) => (a.generatedAt < b.generatedAt ? 1 : -1));
-      sendJson(response, 200, runs);
-    } catch {
-      sendJson(response, 200, []);
-    }
+    const markets = await listMarkets();
+    sendJson(response, 200, markets);
     return;
   }
 
   if (url.pathname.startsWith('/api/runs/')) {
     const slug = slugify(decodeURIComponent(url.pathname.slice('/api/runs/'.length)));
-    try {
-      const report = JSON.parse(await readFile(join(RUNS_DIR, `${slug}.json`), 'utf8'));
-      // Runs saved before analysis health was recorded still carry the stats it
-      // is derived from. Deriving it here describes what already happened — it
-      // changes no evidence — and stops an old failed run from rendering its
-      // failure as a finding about the market.
-      if (!report.analysis) {
-        report.analysis = assessAnalysis({
-          extraction: report.extraction ?? null,
-          themeStats: report.themeStats ?? null,
-          retrieval: report.retrieval ?? null,
-        });
-
-        // The stored verdict was computed on the assumption that zero verified
-        // statements meant the market had none. When nothing was ever read, that
-        // assumption was false, so the finding is withdrawn rather than shown.
-        if (report.analysis.state === 'failed' && report.coverage) {
-          report.coverage = {
-            ...report.coverage,
-            verdict: 'unknown',
-            explanation: report.analysis.explanation,
-          };
-          report.haltReason = 'analysis-failed';
-        }
-      }
-      sendJson(response, 200, report);
-    } catch {
-      sendJson(response, 404, { error: 'No cached run for that market.' });
+    const report = await getReport(slug);
+    if (!report) {
+      sendJson(response, 404, { error: 'not_analyzed', slug });
+      return;
     }
+    sendJson(response, 200, report);
     return;
   }
 
   await serveStatic(url.pathname, response);
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`Startup Opportunity Engine → http://localhost:${PORT}`);
-});
+// Gated so importing this module (e.g. tests importing handleRequest) never
+// has the side effect of binding a real port. Both local `node server.js`
+// and Vercel's Node builder run this file as the main script — same as
+// running it directly — so the guard is true in both of those, and only
+// false when something else `import`s this module as a library.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const server = createServer(handleRequest);
+  server.listen(PORT, () => {
+    console.log(`Startup Opportunity Engine → http://localhost:${PORT}`);
+  });
+}
