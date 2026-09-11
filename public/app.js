@@ -1065,6 +1065,7 @@ async function getSession() {
 
 function showApp(session) {
   $('auth-form').hidden = true;
+  $('auth-pitch').hidden = true;
   $('search-panel').hidden = false;
   $('main').hidden = false;
   $('account-bar').hidden = false;
@@ -1073,6 +1074,7 @@ function showApp(session) {
 
 function showAuthForm() {
   $('auth-form').hidden = false;
+  $('auth-pitch').hidden = false;
   $('search-panel').hidden = true;
   $('main').hidden = true;
   $('account-bar').hidden = true;
