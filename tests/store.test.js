@@ -115,7 +115,14 @@ test('getReport returns null for a market that has never been analyzed', dbTest,
 test('anyRunInProgress reflects a live running row and ignores stale ones', dbTest, async () => {
   await cleanup();
   try {
-    assert.equal(await anyRunInProgress(), false);
+    // anyRunInProgress() is deliberately global, so this test needs the
+    // database to itself. Said out loud, because the bare assertion diff
+    // looks like a logic bug when it is really "you are mid-analysis".
+    assert.equal(
+      await anyRunInProgress(),
+      false,
+      'a real analysis is running against this database — let it finish before running the suite',
+    );
     const claim = await beginRun(TEST_SLUG, 'in progress market');
     assert.equal(await anyRunInProgress(), true);
 

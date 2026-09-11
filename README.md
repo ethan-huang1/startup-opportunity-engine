@@ -338,10 +338,12 @@ nobody has analysed yet, and getting it. That needs the pipeline to run
 somewhere other than a laptop.
 
 The seam for it already exists. [lib/claude.js](lib/claude.js) is the only
-module in the project that calls a model — every AI stage goes through its
-`askForJson`, and nothing else spawns anything. Swapping the local CLI for a
-hosted agent means reimplementing that one function; scoring, storage,
-evidence verification, and the UI do not change. The second change is in
+module in the project that calls a model: all four AI stages go through its
+`askForJson`, and none of them knows how the answer was produced. (The one
+other subprocess in the codebase is `python3` for the Reddit collector,
+which fetches data and calls no model.) Swapping the local CLI for a hosted
+agent means reimplementing that one function; scoring, storage, evidence
+verification, and the UI do not change. The second change is in
 [lib/access.js](lib/access.js), where `generationAvailability()` currently
 answers `local-only` in production and would instead dispatch to the hosted
 executor.
