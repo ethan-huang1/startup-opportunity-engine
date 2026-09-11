@@ -114,3 +114,39 @@ The working tree currently has unreviewed, uncommitted changes on top of what's 
 4. **Finding 3** — rate limiting / idempotency, ideally by finishing and reviewing the in-progress `lib/store.js` work rather than reinventing it.
 5. **Finding 6** — fix the error message leak regardless of what else changes; treat the `EROFS` crash itself as something to *replace* (via 3/4's proper fix), not preserve.
 6. Findings 5, 7, 8 — cheap, non-urgent hardening.
+
+---
+
+## Resolution (follow-up pass)
+
+Recorded here rather than by editing the findings above — the audit is a
+point-in-time document and rewriting it would destroy the record of what
+was actually found.
+
+| Finding | Status | What changed |
+| --- | --- | --- |
+| 1 — no authorization tier | **Fixed** | Generation is `POST /api/analyses`, admin-only, with admin derived server-side from `ADMIN_EMAILS` on every request. Covered by `tests/auth.test.js`. |
+| 2 — open, unverified signup | **Fixed differently than recommended** | Signup is deliberately *open*, because the product is a public catalogue of saved research. What changed is what a signup is worth: read access to saved reports and nothing else. It cannot generate, refresh, modify, or delete. Email verification is still absent — see "remaining" below. |
+| 3 — no rate limiting or concurrency control | **Fixed** | Per-account rate limit (`checkRateLimit`), a system-wide in-flight check (`anyRunInProgress`), and an atomic per-market claim backed by a partial unique index (`beginRun`). Generation is additionally refused outright in production. |
+| 4 — no ownership isolation on cached data | **Accepted, by design** | Saved analyses are intentionally shared: a growing public catalogue is the product. Nothing user-specific is stored in them. |
+| 5 — unauthenticated GitHub collector | **Mitigated** | `GITHUB_TOKEN` is honoured when set. It only matters during generation, which no longer runs in production at all, so the shared-quota exposure is gone. |
+| 6 — `EROFS` crash as an accidental brake | **Fixed** | The runtime filesystem write is gone; Neon is the only persistence. The brake is now explicit (`generationAvailability()` returns `local-only` whenever `VERCEL` is set) rather than incidental. |
+| 7 — email enumeration on signup | **Open, accepted** | Inherent to Better Auth's default responses. Low value to an attacker against a catalogue with no per-user data. |
+| 8 — missing-`Origin` requests | **Fixed upstream** | Better Auth 1.7 rejects state-changing requests with no `Origin` (`MISSING_OR_NULL_ORIGIN`); both test clients had to be taught to send one. `baseURL` and `trustedOrigins` are now set explicitly on Vercel instead of inferred. |
+
+Also addressed in the same pass: unhandled exceptions return a plain 500
+instead of hanging the socket, and no stack trace, SQL fragment, or
+filesystem path reaches a client.
+
+### Remaining, accepted for now
+
+- **No email verification.** There is no outbound email infrastructure for
+  this project; requiring a confirmation nobody can receive would simply
+  break signup. Account creation is throttled in production by Better
+  Auth's built-in rate limiter. Revisit when email exists.
+- **The rate limiter is in-memory**, so it resets on cold start and is not
+  shared across instances. It guards an admin-only, local-only route, so
+  the real bound is that there is exactly one admin machine.
+- **`runs/*.json` and the two large session transcripts at the repository
+  root** are historical artefacts, not live data. The runs are load-bearing
+  test fixtures; the transcripts are not, and could be removed.

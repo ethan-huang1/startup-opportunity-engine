@@ -135,9 +135,12 @@ async function streamRun(market, slug, runId, request, response) {
     }
     send('report', report);
   } catch (error) {
-    console.error(`[run failed] ${market}: ${error.message}`);
+    console.error(`[run failed] ${market}:`, error);
     await failRun(runId, error.message);
-    send('failed', { message: error.message });
+    // Only an admin can reach this, and the detail is genuinely useful to
+    // them mid-run — but a raw exception string can carry a path or a
+    // connection string, so the full object stays in the server log.
+    send('failed', { message: `The analysis stopped: ${error.message}` });
   } finally {
     clearInterval(heartbeat);
     if (!response.writableEnded) response.end();
@@ -168,9 +171,9 @@ async function route(request, response) {
       return;
     }
 
-    // Research/generation and run-history are admin-only for now
-    // (SECURITY_AUDIT.md, Findings 1 and 4). /api/fixture stays open to any
-    // signed-in account — it's static sample data, not live research.
+    // Only generation is admin-only (SECURITY_AUDIT.md, Finding 1). Reading
+    // saved analyses is the product and is open to any signed-in account;
+    // writing one spends real money and is not.
     if (isAdminRoute(url.pathname) && !isAdminEmail(session.user.email)) {
       sendJson(response, 403, { error: 'Admin access required.' });
       return;
