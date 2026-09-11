@@ -726,6 +726,23 @@ function renderWeightSliders() {
 
 /* ----------------------------------------------------------------- render */
 
+/**
+ * One "Refresh analysis" control above a rendered report. Explicit and
+ * separate from the initial "Request analysis" prompt (promptForAnalysis):
+ * refreshing is the same POST /api/analyses call, just against a market that
+ * already has a report — the old report stays visible the whole time (see
+ * lib/store.js's getReport, which never returns an in-flight run).
+ */
+function renderRefreshControl(market) {
+  let refresh = document.getElementById('refresh-analysis');
+  if (!refresh) {
+    refresh = el('button', { type: 'button', id: 'refresh-analysis', class: 'link-button' });
+    $('results').insertAdjacentElement('beforebegin', refresh);
+  }
+  refresh.textContent = 'Refresh analysis';
+  refresh.onclick = () => runResearch(market);
+}
+
 function renderReport(report) {
   state.report = report;
   state.weights = { ...report.weights };
@@ -733,6 +750,7 @@ function renderReport(report) {
   state.evidenceExpanded = false;
 
   $('results').hidden = false;
+  renderRefreshControl(report.market);
   renderAnalysis(report.analysis);
   renderCoverage(report.coverage, report.retrieval, report.subreddits);
 
@@ -751,6 +769,35 @@ function renderReport(report) {
 
 /* -------------------------------------------------------------------- run */
 
+/**
+ * Reads a fetch() response as Server-Sent Events (`event: X\ndata: Y\n\n`
+ * framing, same as streamRun() on the server) and dispatches to `handlers`.
+ * EventSource can only do GET; analysis is POST because it creates state and
+ * spends real LLM calls, so the stream is consumed by hand instead.
+ */
+async function consumeSSE(response, handlers) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return;
+    buffer += decoder.decode(value, { stream: true });
+
+    let boundary;
+    while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+      const raw = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+      const lines = raw.split('\n');
+      const eventLine = lines.find((line) => line.startsWith('event: '));
+      const dataLine = lines.find((line) => line.startsWith('data: '));
+      if (!eventLine || !dataLine) continue; // heartbeat comment, etc.
+      handlers[eventLine.slice('event: '.length)]?.(JSON.parse(dataLine.slice('data: '.length)));
+    }
+  }
+}
+
 function runResearch(market) {
   const button = $('run-button');
   const errorBox = $('error');
@@ -759,44 +806,68 @@ function runResearch(market) {
   button.disabled = true;
   button.textContent = 'Researching…';
   errorBox.hidden = true;
+  $('status').hidden = true;
   $('results').hidden = true;
   startElapsedClock();
 
-  const source = new EventSource(`/api/run?market=${encodeURIComponent(market)}`);
-
-  source.addEventListener('progress', (message) => {
-    events.push(JSON.parse(message.data));
-    renderProgress(events);
-  });
-
-  source.addEventListener('report', (message) => {
-    renderReport(JSON.parse(message.data));
+  const finish = () => {
     stopElapsedClock();
-    source.close();
-    button.disabled = false;
-    button.textContent = 'Research';
-  });
-
-  source.addEventListener('failed', (message) => {
-    errorBox.textContent = `Run failed: ${JSON.parse(message.data).message}`;
-    errorBox.hidden = false;
-    stopElapsedClock();
-    source.close();
-    button.disabled = false;
-    button.textContent = 'Research';
-  });
-
-  source.onerror = () => {
-    // EventSource fires this on normal close too; only surface a real failure.
-    if (source.readyState === EventSource.CLOSED && !state.report) {
-      errorBox.textContent = 'Lost connection to the server. Is it still running?';
-      errorBox.hidden = false;
-    }
-    stopElapsedClock();
-    source.close();
     button.disabled = false;
     button.textContent = 'Research';
   };
+
+  fetch('/api/analyses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ market }),
+  })
+    .then(async (response) => {
+      if (response.status === 409) {
+        errorBox.textContent = 'This market is already being analyzed — try again shortly.';
+        errorBox.hidden = false;
+        return finish();
+      }
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        errorBox.textContent = body.error || `Request failed (${response.status}).`;
+        errorBox.hidden = false;
+        return finish();
+      }
+
+      await consumeSSE(response, {
+        progress: (event) => {
+          events.push(event);
+          renderProgress(events);
+        },
+        report: (report) => {
+          renderReport(report);
+          finish();
+        },
+        failed: (data) => {
+          errorBox.textContent = `Run failed: ${data.message}`;
+          errorBox.hidden = false;
+          finish();
+        },
+      });
+    })
+    .catch(() => {
+      errorBox.textContent = 'Lost connection to the server. Is it still running?';
+      errorBox.hidden = false;
+      finish();
+    });
+}
+
+/** Shown when a search finds no existing analysis — the user must explicitly
+ * ask for one rather than a search silently spending Claude calls. */
+function promptForAnalysis(market) {
+  const status = $('status');
+  clear(status);
+  status.hidden = false;
+  status.appendChild(text('This market has not been analyzed yet. '));
+
+  const button = el('button', { type: 'button', text: 'Request analysis' });
+  button.addEventListener('click', () => runResearch(market), { once: true });
+  status.appendChild(button);
 }
 
 /**
@@ -821,10 +892,24 @@ async function loadCachedRun(slug) {
   }
 }
 
-$('search-form').addEventListener('submit', (event) => {
+$('search-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const market = $('market').value.trim();
-  if (market.length >= 3) runResearch(market);
+  if (market.length < 3) return;
+
+  $('error').hidden = true;
+  $('status').hidden = true;
+  $('results').hidden = true;
+
+  // Zero-Claude path: an already-analyzed market renders straight from Neon.
+  // Only an explicit "Request analysis" click (see promptForAnalysis) spends
+  // an LLM call.
+  const response = await fetch(`/api/runs/${encodeURIComponent(market)}`);
+  if (response.ok) {
+    renderReport(await response.json());
+    return;
+  }
+  promptForAnalysis(market);
 });
 
 $('hide-inference').addEventListener('change', (event) => {
