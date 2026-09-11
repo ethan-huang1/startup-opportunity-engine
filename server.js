@@ -7,7 +7,7 @@
  */
 
 import { createServer } from 'node:http';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -15,12 +15,17 @@ import { runPipeline } from './lib/pipeline.js';
 import { auth } from './lib/auth.js';
 import { toNodeHandler, fromNodeHeaders } from 'better-auth/node';
 import { beginRun, failRun, saveRunResult, getReport, listMarkets, anyRunInProgress } from './lib/store.js';
-import { isAdminEmail, isAdminRoute, GENERATION_ENABLED, checkRateLimit } from './lib/access.js';
+import {
+  isAdminEmail,
+  isAdminRoute,
+  checkRateLimit,
+  generationAvailability,
+  GENERATION_UNAVAILABLE_MESSAGE,
+} from './lib/access.js';
 import { isClaudeAvailable } from './lib/claude.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PUBLIC_DIR = join(ROOT, 'public');
-const RUNS_DIR = join(ROOT, 'runs');
 const PORT = Number(process.env.PORT) || 3000;
 
 const CONTENT_TYPES = {
@@ -114,21 +119,19 @@ async function streamRun(market, slug, runId, request, response) {
 
   try {
     const report = await runPipeline(market, (event) => send('progress', event));
-    // The run is finished and paid for either way, so cache it even if the
-    // client left — reopening the market should be instant rather than
-    // re-run. Local-only: Vercel's bundle filesystem is read-only, and Neon
-    // (below) is the only persistence that exists there.
-    if (!process.env.VERCEL) {
-      await mkdir(RUNS_DIR, { recursive: true });
-      await writeFile(join(RUNS_DIR, `${slug}.json`), JSON.stringify(report, null, 2));
-    }
+    // The run is finished and paid for either way, so save it even if the
+    // client left — reopening the market should be instant rather than a
+    // re-run. Neon is the only place a report is written: it is what Vercel
+    // reads, so a market analyzed here is live there with no redeploy.
+    // (runs/*.json is a frozen archive of pre-Neon runs kept as test
+    // fixtures, not a write target.)
     try {
       await saveRunResult(runId, report);
     } catch (dbError) {
-      // The file cache above still has the result; don't fail the response
-      // over it, but the market must not stay stuck "analyzing" forever.
       console.error(`[neon save failed] ${market}: ${dbError.message}`);
-      await failRun(runId, `Saved to disk but not to Neon: ${dbError.message}`);
+      await failRun(runId, `Could not save to Neon: ${dbError.message}`);
+      send('failed', { message: 'The analysis finished but could not be saved.' });
+      return;
     }
     send('report', report);
   } catch (error) {
@@ -142,11 +145,12 @@ async function streamRun(market, slug, runId, request, response) {
 }
 
 /**
- * The whole request-routing logic, exported so tests can call it directly
- * (with a real ephemeral-port server, or fake request/response objects)
- * without going through `node server.js`'s module-level `listen()`.
+ * The whole request-routing logic, exported (via handleRequest) so tests can
+ * call it directly — with a real ephemeral-port server, or fake
+ * request/response objects — without going through `node server.js`'s
+ * module-level `listen()`.
  */
-export async function handleRequest(request, response) {
+async function route(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
 
   if (url.pathname.startsWith('/api/auth/')) {
@@ -180,13 +184,21 @@ export async function handleRequest(request, response) {
   // see the new run until it finishes (see lib/store.js's getReport).
   if (request.method === 'POST' && url.pathname === '/api/analyses') {
     // Fail-closed kill switch: checked before anything that scrapes or makes
-    // an outbound request, not just before the LLM call.
-    if (!GENERATION_ENABLED) {
-      sendJson(response, 503, { error: 'Report generation is currently disabled.' });
+    // an outbound request, not just before the LLM call. In production this
+    // refuses unconditionally — the absent `claude` binary is not the control.
+    const availability = generationAvailability();
+    if (!availability.available) {
+      sendJson(response, 503, {
+        error: GENERATION_UNAVAILABLE_MESSAGE[availability.reason],
+        reason: availability.reason,
+      });
       return;
     }
     if (!(await isClaudeAvailable())) {
-      sendJson(response, 503, { error: 'Claude is unavailable in this environment.' });
+      sendJson(response, 503, {
+        error: 'The claude CLI is not installed or not on PATH here.',
+        reason: 'no-claude',
+      });
       return;
     }
     if (!checkRateLimit(session.user.email)) {
@@ -223,6 +235,22 @@ export async function handleRequest(request, response) {
     return;
   }
 
+  // What this account may do. The UI asks once at load and hides controls it
+  // cannot use, rather than offering a button that 403s or 503s.
+  if (url.pathname === '/api/session') {
+    const availability = generationAvailability();
+    sendJson(response, 200, {
+      email: session.user.email,
+      isAdmin: isAdminEmail(session.user.email),
+      generation: {
+        available: availability.available,
+        reason: availability.reason,
+        message: availability.reason ? GENERATION_UNAVAILABLE_MESSAGE[availability.reason] : null,
+      },
+    });
+    return;
+  }
+
   // Deterministic report used by the browser tests. Live runs vary too much to
   // assert against, and rarely exercise every UI state in one report.
   if (url.pathname === '/api/fixture') {
@@ -255,6 +283,26 @@ export async function handleRequest(request, response) {
   }
 
   await serveStatic(url.pathname, response);
+}
+
+/**
+ * Error boundary. Without this, a Neon outage rejects the handler's promise
+ * and the socket hangs until the client times out — which the UI cannot
+ * tell apart from "no such market". Every unexpected failure becomes a
+ * plain 500 the UI can report honestly, with the detail kept server-side:
+ * stack traces, SQL, and filesystem paths are not the user's business.
+ */
+export async function handleRequest(request, response) {
+  try {
+    await route(request, response);
+  } catch (error) {
+    console.error(`[unhandled] ${request.method} ${request.url}:`, error);
+    if (!response.headersSent && !response.writableEnded) {
+      sendJson(response, 500, { error: 'Something went wrong on our side. Try again shortly.' });
+    } else if (!response.writableEnded) {
+      response.end();
+    }
+  }
 }
 
 // Gated so importing this module (e.g. tests importing handleRequest) never

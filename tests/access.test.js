@@ -5,6 +5,7 @@ import {
   parseAdminEmails,
   isAdminRoute,
   parseGenerationEnabled,
+  generationAvailability,
   checkRateLimit,
   _resetRateLimitForTests,
 } from '../lib/access.js';
@@ -22,17 +23,44 @@ test('parseAdminEmails: trims whitespace and lowercases', () => {
   assert.equal(admins.size, 2);
 });
 
-test('isAdminRoute: research/generation and run-history are admin-only', () => {
+test('isAdminRoute: generation is admin-only', () => {
   assert.equal(isAdminRoute('/api/analyses'), true);
-  assert.equal(isAdminRoute('/api/runs'), true);
-  assert.equal(isAdminRoute('/api/runs/some-market'), true);
 });
 
-test('isAdminRoute: fixture, auth, and static routes are not admin-only', () => {
+test('isAdminRoute: reading saved analyses is open to any signed-in account', () => {
+  // Reads are the product. Only writing a report costs money, so only
+  // writing is restricted — a normal user must be able to open these.
+  assert.equal(isAdminRoute('/api/runs'), false);
+  assert.equal(isAdminRoute('/api/runs/some-market'), false);
+  assert.equal(isAdminRoute('/api/session'), false);
   assert.equal(isAdminRoute('/api/fixture'), false);
   assert.equal(isAdminRoute('/api/auth/get-session'), false);
   assert.equal(isAdminRoute('/'), false);
   assert.equal(isAdminRoute('/app.js'), false);
+});
+
+test('generationAvailability: production refuses regardless of the kill switch', () => {
+  // The absent `claude` binary on Vercel is an accident of the runtime, not
+  // a control. Even with GENERATION_ENABLED=true, serverless must refuse.
+  assert.deepEqual(
+    generationAvailability({ enabled: true, serverless: true }),
+    { available: false, reason: 'local-only' },
+  );
+  assert.deepEqual(
+    generationAvailability({ enabled: false, serverless: true }),
+    { available: false, reason: 'local-only' },
+  );
+});
+
+test('generationAvailability: locally it follows the kill switch', () => {
+  assert.deepEqual(
+    generationAvailability({ enabled: false, serverless: false }),
+    { available: false, reason: 'disabled' },
+  );
+  assert.deepEqual(
+    generationAvailability({ enabled: true, serverless: false }),
+    { available: true, reason: null },
+  );
 });
 
 test('parseGenerationEnabled: fails closed for everything except the literal string "true"', () => {
