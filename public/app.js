@@ -41,7 +41,18 @@ const state = {
   weights: null,
   evidenceFilter: 'all',
   evidenceExpanded: false,
+  /** From GET /api/session: { email, isAdmin, generation: {...} }. */
+  capabilities: null,
 };
+
+/**
+ * Generation is admin-only AND local-only. The server enforces both; this
+ * only decides whether to show a control, so that nobody is offered a
+ * button that answers 403 or 503.
+ */
+function canGenerate() {
+  return Boolean(state.capabilities?.isAdmin && state.capabilities?.generation?.available);
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -726,21 +737,50 @@ function renderWeightSliders() {
 
 /* ----------------------------------------------------------------- render */
 
+/** "3 days ago", for a freshness line that does not require date arithmetic. */
+function relativeAge(iso) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (!Number.isFinite(days)) return null;
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 60) return `${days} days ago`;
+  return `${Math.round(days / 30)} months ago`;
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric',
+  });
+}
+
 /**
- * One "Refresh analysis" control above a rendered report. Explicit and
- * separate from the initial "Request analysis" prompt (promptForAnalysis):
- * refreshing is the same POST /api/analyses call, just against a market that
- * already has a report — the old report stays visible the whole time (see
- * lib/store.js's getReport, which never returns an in-flight run).
+ * The bar above a report: when it was analyzed, and (for an admin running
+ * locally) a refresh control. Refreshing is the same POST /api/analyses
+ * call as the first run — the existing report stays readable the whole
+ * time, because lib/store.js's getReport never returns an in-flight run and
+ * a failed run never replaces the last good one.
  */
-function renderRefreshControl(market) {
-  let refresh = document.getElementById('refresh-analysis');
-  if (!refresh) {
-    refresh = el('button', { type: 'button', id: 'refresh-analysis', class: 'link-button' });
-    $('results').insertAdjacentElement('beforebegin', refresh);
+function renderReportMeta(report) {
+  const bar = $('report-meta');
+  clear(bar);
+  bar.hidden = false;
+
+  if (report.generatedAt) {
+    const age = relativeAge(report.generatedAt);
+    bar.appendChild(el('span', {
+      class: 'freshness',
+      title: new Date(report.generatedAt).toString(),
+      text: `Analyzed ${formatDate(report.generatedAt)}${age ? ` · ${age}` : ''}`,
+    }));
   }
-  refresh.textContent = 'Refresh analysis';
-  refresh.onclick = () => runResearch(market);
+
+  if (canGenerate()) {
+    const refresh = el('button', {
+      type: 'button', id: 'refresh-analysis', class: 'link-button', text: 'Refresh analysis',
+    });
+    refresh.onclick = () => runResearch(report.market);
+    bar.appendChild(refresh);
+  }
 }
 
 function renderReport(report) {
@@ -750,7 +790,7 @@ function renderReport(report) {
   state.evidenceExpanded = false;
 
   $('results').hidden = false;
-  renderRefreshControl(report.market);
+  renderReportMeta(report);
   renderAnalysis(report.analysis);
   renderCoverage(report.coverage, report.retrieval, report.subreddits);
 
@@ -857,39 +897,144 @@ function runResearch(market) {
     });
 }
 
-/** Shown when a search finds no existing analysis — the user must explicitly
- * ask for one rather than a search silently spending Claude calls. */
-function promptForAnalysis(market) {
-  const status = $('status');
-  clear(status);
-  status.hidden = false;
-  status.appendChild(text('This market has not been analyzed yet. '));
+/**
+ * A missing report, an expired session, a refused one, and a database
+ * outage are four different facts about the world. Reporting all of them
+ * as "this market has not been analyzed yet" tells the user something
+ * false about the data — so only a real 404 gets that message.
+ *
+ * Returns null for 404, meaning "genuinely not analyzed".
+ */
+function describeReadFailure(status) {
+  if (status === 401) return 'Your session has expired. Sign in again to keep reading reports.';
+  if (status === 403) return 'This account is not allowed to open that report.';
+  if (status === 404) return null;
+  if (status >= 500) {
+    return 'The report database could not be reached. That is a problem on our side, ' +
+      'not a missing analysis — please try again shortly.';
+  }
+  return `Could not load that report (HTTP ${status}).`;
+}
 
-  const button = el('button', { type: 'button', text: 'Request analysis' });
-  button.addEventListener('click', () => runResearch(market), { once: true });
-  status.appendChild(button);
+function showError(message) {
+  const errorBox = $('error');
+  errorBox.textContent = message;
+  errorBox.hidden = false;
+  $('status').hidden = true;
 }
 
 /**
- * `?run=<slug>` renders a cached run instead of starting a new one. Revisiting
- * previous research is the obvious use, and it also makes the browser tests
- * deterministic — they assert against a fixed report rather than live sources.
+ * Shown only when the server really did say 404. Whether it offers to run
+ * anything depends on what this account can actually do: an admin running
+ * locally gets a button, everyone else gets the truth about how analyses
+ * get here.
  */
-async function loadCachedRun(slug) {
-  const errorBox = $('error');
-  try {
-    const response = await fetch(
-      slug === 'fixture' ? '/api/fixture' : `/api/runs/${encodeURIComponent(slug)}`,
-    );
-    if (!response.ok) throw new Error('No cached run for that market.');
+function showNotAnalyzed(market) {
+  const status = $('status');
+  clear(status);
+  status.hidden = false;
+  $('error').hidden = true;
+  $('report-meta').hidden = true;
+
+  status.appendChild(el('strong', { text: `"${market}" hasn't been analyzed yet.` }));
+
+  if (canGenerate()) {
+    status.appendChild(text(' '));
+    const button = el('button', { type: 'button', text: 'Analyze this market' });
+    button.addEventListener('click', () => runResearch(market), { once: true });
+    status.appendChild(button);
+    return;
+  }
+
+  const reason = state.capabilities?.generation?.message;
+  status.appendChild(el('p', {
+    class: 'control-note',
+    text: reason
+      ? `${reason} Browse the analyses that already exist below.`
+      : 'Browse the analyses that already exist below.',
+  }));
+}
+
+/** Fetches a report by slug (or the test fixture) and renders it. */
+async function openReport(slug) {
+  $('error').hidden = true;
+  $('status').hidden = true;
+  $('results').hidden = true;
+
+  const response = await fetch(
+    slug === 'fixture' ? '/api/fixture' : `/api/runs/${encodeURIComponent(slug)}`,
+  ).catch(() => null);
+
+  if (!response) {
+    showError('Could not reach the server. Is it still running?');
+    return false;
+  }
+  if (response.ok) {
     const report = await response.json();
     renderReport(report);
     $('market').value = report.market;
-    $('status').hidden = true;
-  } catch (error) {
-    errorBox.textContent = error.message;
-    errorBox.hidden = false;
+    return true;
   }
+
+  const failure = describeReadFailure(response.status);
+  if (failure) {
+    showError(failure);
+    return false;
+  }
+  showNotAnalyzed(slug);
+  return false;
+}
+
+/**
+ * `?run=<slug>` renders a saved report instead of starting a new one.
+ * Revisiting previous research is the obvious use, and it also makes the
+ * browser tests deterministic — they assert against a fixed report rather
+ * than live sources.
+ */
+const loadCachedRun = openReport;
+
+/* ------------------------------------------------------- existing reports */
+
+/**
+ * "Explore existing analyses" — the real contents of Neon, not a curated
+ * list. Without it, a first-time visitor has to guess which markets happen
+ * to have data.
+ */
+async function renderExistingAnalyses() {
+  const panel = $('explore');
+  const list = $('explore-list');
+  const response = await fetch('/api/runs').catch(() => null);
+  if (!response?.ok) {
+    // Not worth an error banner: the search box still works, and a failed
+    // read is already reported when the user actually asks for a report.
+    panel.hidden = true;
+    return;
+  }
+
+  const markets = await response.json();
+  clear(list);
+  if (markets.length === 0) {
+    panel.hidden = false;
+    list.appendChild(el('p', { class: 'control-note', text: 'No analyses have been saved yet.' }));
+    return;
+  }
+
+  for (const entry of markets) {
+    const button = el('button', { type: 'button', class: 'explore-item' });
+    button.appendChild(el('span', { class: 'explore-market', text: entry.market }));
+    const facts = [
+      `${entry.opportunities} ${entry.opportunities === 1 ? 'opportunity' : 'opportunities'}`,
+      entry.verdict ? `${entry.verdict} evidence` : null,
+      entry.generatedAt ? `analyzed ${relativeAge(entry.generatedAt)}` : null,
+    ].filter(Boolean);
+    button.appendChild(el('span', { class: 'explore-meta', text: facts.join(' · ') }));
+    button.addEventListener('click', () => {
+      openReport(entry.slug);
+      $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    list.appendChild(button);
+  }
+  panel.hidden = false;
 }
 
 $('search-form').addEventListener('submit', async (event) => {
@@ -897,19 +1042,9 @@ $('search-form').addEventListener('submit', async (event) => {
   const market = $('market').value.trim();
   if (market.length < 3) return;
 
-  $('error').hidden = true;
-  $('status').hidden = true;
-  $('results').hidden = true;
-
-  // Zero-Claude path: an already-analyzed market renders straight from Neon.
-  // Only an explicit "Request analysis" click (see promptForAnalysis) spends
-  // an LLM call.
-  const response = await fetch(`/api/runs/${encodeURIComponent(market)}`);
-  if (response.ok) {
-    renderReport(await response.json());
-    return;
-  }
-  promptForAnalysis(market);
+  // Zero-LLM path: an already-analyzed market renders straight from Neon.
+  // Only an explicit click (see showNotAnalyzed) ever spends an LLM call.
+  await openReport(market);
 });
 
 $('hide-inference').addEventListener('change', (event) => {
@@ -941,6 +1076,9 @@ function showAuthForm() {
   $('search-panel').hidden = true;
   $('main').hidden = true;
   $('account-bar').hidden = true;
+  $('explore').hidden = true;
+  $('report-meta').hidden = true;
+  state.capabilities = null;
   $('auth-form').reset();
   setAuthMode('signin');
 }
@@ -958,7 +1096,7 @@ async function submitAuth(path, body) {
       const payload = await response.json().catch(() => ({}));
       throw new Error(payload.message || 'That did not work — check your details.');
     }
-    showApp(await getSession());
+    await startSignedIn(await getSession());
   } catch (error) {
     errorBox.textContent = error.message;
     errorBox.hidden = false;
@@ -997,11 +1135,25 @@ $('sign-out-button').addEventListener('click', async () => {
   showAuthForm();
 });
 
+/**
+ * Everything that has to happen once a session exists: find out what this
+ * account may do (so controls match reality), list what is already in the
+ * database, and open a deep-linked report if there is one.
+ */
+async function startSignedIn(session) {
+  showApp(session);
+  state.capabilities = await fetch('/api/session')
+    .then((response) => (response.ok ? response.json() : null))
+    .catch(() => null);
+
+  const deepLink = new URLSearchParams(location.search).get('run');
+  if (deepLink) await loadCachedRun(deepLink);
+  await renderExistingAnalyses();
+}
+
 const session = await getSession();
 if (session) {
-  showApp(session);
-  const cachedRun = new URLSearchParams(location.search).get('run');
-  if (cachedRun) loadCachedRun(cachedRun);
+  await startSignedIn(session);
 } else {
   showAuthForm();
 }

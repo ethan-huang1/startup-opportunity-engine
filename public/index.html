@@ -80,6 +80,19 @@
     <div id="status" class="status" hidden aria-live="polite"></div>
     <div id="error" class="error" role="alert" hidden></div>
 
+    <!-- The real contents of the database, so nobody has to guess which
+         markets have data. Populated from GET /api/runs. -->
+    <section id="explore" class="panel" aria-labelledby="explore-heading" hidden>
+      <h2 id="explore-heading">Explore existing analyses</h2>
+      <p class="panel-note">
+        Every market below has already been researched and saved. Opening one
+        is instant and costs nothing — no model is called to read a report.
+      </p>
+      <div id="explore-list" class="explore-list"></div>
+    </section>
+
+    <div id="report-meta" class="report-meta" hidden></div>
+
     <div id="results" hidden>
       <!-- Shown only when the run itself did not complete cleanly. Keeps
            "we could not look" visually distinct from "we looked and found little". -->
@@ -165,8 +178,9 @@
 
   <footer class="shell">
     <p>
-      Runs are cached locally. Nothing is uploaded. Sources are searched over a
-      30-day window.
+      Completed analyses are saved and served from a database, so reading one
+      costs nothing and calls no model. Sources are searched over a 30-day
+      window.
     </p>
   </footer>
 
