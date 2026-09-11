@@ -37,9 +37,14 @@ function isNeonRequest(input) {
 mock.method(auth.api, 'getSession', async () => ({ user: { email: 'test-admin@example.com' } }));
 
 function fakeResponse() {
-  const res = { statusCode: null, body: '', writableEnded: false };
+  // headersSent matters: server.js's error boundary consults it before
+  // trying to send a 500, and a fake that never sets it would let the
+  // boundary write a second set of headers onto a response that already
+  // has them.
+  const res = { statusCode: null, body: '', writableEnded: false, headersSent: false };
   res.writeHead = (status) => {
     res.statusCode = status;
+    res.headersSent = true;
     return res;
   };
   res.write = (chunk) => {
