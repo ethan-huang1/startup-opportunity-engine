@@ -960,6 +960,9 @@ async function openReport(slug) {
   $('error').hidden = true;
   $('status').hidden = true;
   $('results').hidden = true;
+  // Or the previous report's freshness line and Refresh button hang above
+  // an empty results area after a failed search.
+  $('report-meta').hidden = true;
 
   const response = await fetch(
     slug === 'fixture' ? '/api/fixture' : `/api/runs/${encodeURIComponent(slug)}`,
