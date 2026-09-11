@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "node --env-file=.env server.js",
-    "test": "node --env-file-if-exists=.env --test tests/",
-    "test:browser": "playwright test",
+    "test": "node --env-file-if-exists=.env --test \"tests/*.test.js\"",
+    "test:browser": "node --env-file-if-exists=.env tests/browser.mjs",
     "migrate": "node --env-file=.env lib/migrate.js",
     "backfill": "node --env-file=.env scripts/backfill-runs-to-neon.mjs"
   },

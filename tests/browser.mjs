@@ -9,9 +9,10 @@
 
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
-const SHOTS = new URL('../verification/', import.meta.url).pathname;
+const SHOTS = fileURLToPath(new URL('../verification/', import.meta.url));
 const ROUND = process.env.ROUND || '01';
 
 const VIEWPORTS = {

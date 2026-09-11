@@ -25,11 +25,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { assessAnalysis, ANALYSIS, STEP, resultsAreTrustworthy } from '../lib/analysis.js';
 import { VERDICT } from '../lib/coverage.js';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const loadRun = async (name) =>
   JSON.parse(await readFile(join(ROOT, 'runs', `${name}.json`), 'utf8'));
 

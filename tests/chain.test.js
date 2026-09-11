@@ -10,12 +10,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { verifyReportChain } from '../lib/verify-chain.js';
 import { makeEvidence } from '../lib/normalize.js';
 import { WEIGHTS } from '../lib/config.js';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 function evidence(id, overrides = {}) {
   return makeEvidence({
@@ -163,28 +164,21 @@ test('catches a cluster claiming more platforms than its members have', () => {
   assert.match(result.problems.join(' '), /declares platforms/);
 });
 
+// No try/catch: a fixture that cannot be read is a broken evidence-integrity
+// check, not a passing one. An earlier version swallowed the error and
+// returned, which is how a URL-encoded path made this test green for months
+// without ever verifying anything.
 test('the committed fixture passes chain verification', async () => {
-  let fixture;
-  try {
-    fixture = JSON.parse(await readFile(join(ROOT, 'fixtures/sample-report.json'), 'utf8'));
-  } catch {
-    // Before the first snapshot there is nothing to check, and inventing one
-    // here is exactly what went wrong last time.
-    return;
-  }
+  const fixture = JSON.parse(await readFile(join(ROOT, 'fixtures/sample-report.json'), 'utf8'));
   const result = verifyReportChain(fixture);
   assert.equal(result.ok, true, `fixture chain is broken:\n${result.problems.join('\n')}`);
   assert.ok(fixture.fixtureSource, 'fixture must record the run it came from');
   assert.ok(fixture.opportunities.length > 0, 'fixture must exercise the ranked UI');
 });
 
-test('every cached run passes chain verification', async () => {
-  let files = [];
-  try {
-    files = (await readdir(join(ROOT, 'runs'))).filter((name) => name.endsWith('.json'));
-  } catch {
-    return;
-  }
+test('every archived run passes chain verification', async () => {
+  const files = (await readdir(join(ROOT, 'runs'))).filter((name) => name.endsWith('.json'));
+  assert.ok(files.length > 0, 'runs/ must keep at least one archived run to verify against');
   for (const name of files) {
     const run = JSON.parse(await readFile(join(ROOT, 'runs', name), 'utf8'));
     const result = verifyReportChain(run);
