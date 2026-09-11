@@ -308,11 +308,20 @@ export async function handleRequest(request, response) {
   }
 }
 
-// Gated so importing this module (e.g. tests importing handleRequest) never
-// has the side effect of binding a real port. Both local `node server.js`
-// and Vercel's Node builder run this file as the main script — same as
-// running it directly — so the guard is true in both of those, and only
-// false when something else `import`s this module as a library.
+/**
+ * Vercel's Node builder imports this file and invokes its default export
+ * per request. It only does that because the module has exports at all —
+ * before handleRequest was exported for the tests, the same file was run as
+ * a plain script, and adding the named export without this line broke every
+ * production request with "the default export must be a function or
+ * server". The guard below is false in that environment, so nothing binds a
+ * port there.
+ */
+export default handleRequest;
+
+// Gated so importing this module (the tests, and Vercel above) never has the
+// side effect of binding a real port. True only when this file is the script
+// Node was started with, i.e. local `node server.js` / `npm start`.
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const server = createServer(handleRequest);
   server.listen(PORT, () => {
