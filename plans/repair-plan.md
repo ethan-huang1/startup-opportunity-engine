@@ -1,1 +1,0 @@
-/Users/ethanhuang/.claude/plans/i-want-to-build-reactive-horizon.md

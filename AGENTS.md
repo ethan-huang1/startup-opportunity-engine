@@ -10,7 +10,24 @@ This repository is the Startup Opportunity Discovery Engine: a deterministic evi
 
 ## Core architecture
 
-- [server.js](server.js): HTTP server and SSE progress stream.
+Read and write are deliberately asymmetric, and most changes belong on one
+side or the other:
+
+- **Read path** (any signed-in account, local and production): search or
+  click a market -> `GET /api/runs*` -> Neon -> saved report -> client-side
+  filtering, sorting, and re-ranking. **No model call, no subprocess, no
+  outbound request may ever appear on this path** — `tests/no-claude-on-read.test.js`
+  asserts it by mocking `spawn` and `fetch` to throw.
+- **Write path** (admin only, local machine only): `POST /api/analyses` ->
+  `lib/pipeline.js` -> the local `claude` CLI -> Neon. Refused outright when
+  `VERCEL` is set, regardless of any other configuration.
+
+- [server.js](server.js): HTTP routing, SSE progress stream, error boundary.
+- [lib/auth.js](lib/auth.js): Better Auth. Signup is open; it grants read access only.
+- [lib/access.js](lib/access.js): admin allowlist, generation kill switch, rate limit.
+- [lib/store.js](lib/store.js): markets + append-only analysis_runs; reads only ever see the newest completed run.
+- [lib/db.js](lib/db.js): Neon HTTP client for runtime queries.
+- [lib/claude.js](lib/claude.js): the only module that calls a model. The swap point for hosted generation later.
 - [lib/pipeline.js](lib/pipeline.js): orchestrates analysis stages in order.
 - [lib/extract.js](lib/extract.js): extracts only quote-backed statements and enforces the verbatim gate.
 - [lib/theme.js](lib/theme.js): AI-assisted grouping of extracted phrases, validated against existing evidence.
@@ -21,23 +38,29 @@ This repository is the Startup Opportunity Discovery Engine: a deterministic evi
 - [lib/analysis.js](lib/analysis.js): run state and failure classification.
 - [public/](public/): vanilla HTML/CSS/JS UI; no framework.
 - [tests/](tests/): unit tests and browser checks.
-- [runs/](runs/): cached run results.
+- [runs/](runs/): frozen pre-Neon run archive, used as test fixtures. Nothing writes here.
 
 ## Commands
 
 Use these commands from the repository root:
 
 ```bash
-npm test            # run the Node.js test suite
-node server.js      # start the app locally at http://localhost:3000
-node tests/browser.mjs  # browser checks; requires a fixture
+npm test              # the Node.js test suite (112 tests, none skipped)
+npm start             # http://localhost:3000; loads .env
+npm run migrate       # apply lib/migrations/*.sql to Neon
+npm run test:browser  # browser checks; needs a running server and a fixture
 ```
 
 Notes:
 
-- Nothing special is required to install for normal use.
+- `DATABASE_URL` must be set (see [.env.example](.env.example)) or most of
+  the suite cannot run. Tests that need it are marked, and a skip is a
+  failure of the run, not a pass.
 - Playwright is the only dev dependency.
 - Many investigations and fixes are best validated with the relevant unit test, not by guesswork.
+- **Never let a test drive `POST /api/analyses` with generation enabled.**
+  It spends real money. Mock `child_process.spawn` to *throw* rather than to
+  return a fake, so an unexpected call fails loudly.
 
 ## Important conventions
 
@@ -49,7 +72,8 @@ Notes:
 
 ### 2. The model is constrained
 
-- LLMs are used only for narrow, bounded steps: extraction, theme grouping, and framing.
+- LLMs are used only for four narrow, bounded steps: community proposal,
+  extraction, theme grouping, and framing.
 - Deterministic code handles deduplication, clustering, scoring, ranking, and evidence floors.
 - Avoid adding new cross-cluster synthesis steps or any stage that invents opportunities.
 
@@ -70,6 +94,14 @@ Notes:
 - Add or update tests for behavior changes.
 - Prefer small, targeted edits over broad refactors.
 - If a bug is related to quoting, classification, or dedupe logic, validate against the real evidence path rather than mocking away the edge case.
+
+### 6. Honesty about failure states
+
+- A missing report, an unauthenticated request, a forbidden one, and a
+  server error are four different facts. Never collapse them into one
+  message in the UI — only a real 404 may say a market has not been analysed.
+- Never expose stack traces, SQL, filesystem paths, or secrets to a client.
+  Log them server-side instead.
 
 ## When editing this project
 

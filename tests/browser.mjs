@@ -52,11 +52,16 @@ async function hasOverflow(page) {
 async function ensureSignedIn(context) {
   const email = process.env.TEST_EMAIL || 'browser-tests@example.com';
   const password = process.env.TEST_PASSWORD || 'browser-tests-password';
+  // Better Auth rejects a state-changing request with no Origin. A real
+  // browser always sends one; Playwright's API client does not.
+  const headers = { origin: BASE };
   const signUp = await context.request.post(`${BASE}/api/auth/sign-up/email`, {
+    headers,
     data: { email, password, name: 'Browser Tests' },
   });
   if (signUp.ok()) return;
   const signIn = await context.request.post(`${BASE}/api/auth/sign-in/email`, {
+    headers,
     data: { email, password },
   });
   if (!signIn.ok()) {
@@ -85,6 +90,13 @@ async function main() {
   }
 
   const report = await fixtureResponse.json();
+
+  // The browser suite runs as an ordinary signed-up account, which is the
+  // state most visitors are in: it must be able to read everything below
+  // and must not be offered generation controls.
+  const capabilities = await (await context.request.get(`${BASE}/api/session`)).json();
+  check('a normal account is not an admin', capabilities.isAdmin === false,
+    `isAdmin=${capabilities.isAdmin}`);
 
   // ---------- adequate-coverage run, desktop ----------
   const page = await context.newPage();
@@ -224,6 +236,26 @@ async function main() {
     `${filtered} of ${expanded}`);
   await page.locator('.filter').first().click();
 
+  // ---------- discovery and freshness ----------
+  const explore = await page.locator('.explore-item').count();
+  check('existing analyses are listed for discovery', explore > 0, `${explore} saved markets`);
+
+  const freshness = await page.locator('#report-meta .freshness').textContent().catch(() => '');
+  check('a report says when it was analyzed', /Analyzed/.test(freshness || ''), freshness?.trim());
+
+  const refreshOffered = await page.locator('#refresh-analysis').count();
+  check('no generation control is offered to a normal account', refreshOffered === 0);
+
+  // A market with no report must say so, and must not offer a run.
+  const missing = await context.newPage();
+  await missing.goto(`${BASE}/?run=definitely-not-a-real-market-xyz`, { waitUntil: 'networkidle' });
+  const missingText = await missing.locator('#status').textContent().catch(() => '');
+  check("a missing market says it hasn't been analyzed",
+    /hasn't been analyzed yet/.test(missingText || ''), missingText?.trim().slice(0, 80));
+  check('a missing market offers no analyze button to a normal account',
+    (await missing.locator('#status button').count()) === 0);
+  await missing.close();
+
   // ---------- keyboard access ----------
   await page.keyboard.press('Tab');
   const focusVisible = await page.evaluate(() => {
@@ -236,7 +268,7 @@ async function main() {
   // ---------- honest insufficient-evidence state ----------
   const halted = await context.newPage();
   await halted.setViewportSize(VIEWPORTS.desktop);
-  const haltedErrors = await consoleErrorsFor(halted, `${BASE}/?run=${process.env.HALTED_SLUG || 'artisan-cheese-shops'}`);
+  const haltedErrors = await consoleErrorsFor(halted, `${BASE}/?run=${process.env.HALTED_SLUG || 'commercial-bakery-owners'}`);
   await halted.waitForTimeout(800);
   const verdictText = await halted.locator('.verdict').first().textContent().catch(() => '');
   const rankedVisible = await halted.locator('#opportunities-section').isVisible().catch(() => false);

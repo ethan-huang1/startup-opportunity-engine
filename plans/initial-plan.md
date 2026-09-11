@@ -1,1 +1,0 @@
-/Users/ethanhuang/.claude/plans/initial-plan.md

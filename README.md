@@ -11,26 +11,88 @@ opportunities and staples citations on afterward.
 ## Running it
 
 ```bash
-node server.js           # http://localhost:3000
-npm test                 # 83 unit tests
-node tests/browser.mjs   # 27 browser checks (needs a fixture)
+npm install
+npm run migrate          # apply lib/migrations/*.sql to Neon (once)
+npm start                # http://localhost:3000
+npm test                 # the Node test suite (112 tests)
+npm run test:browser     # browser checks against a running server
 ```
 
-Nothing to install for normal use. Playwright is the only dev dependency.
+Playwright is the only dev dependency. See [Setup](#setup) for the
+environment variables — the app will not start usefully without a
+`DATABASE_URL`.
+
+## Architecture
+
+Research is expensive. Reading research is not. The system is built around
+that asymmetry: a completed analysis is written once, to Postgres, and
+every read after that is a database query with no model in the path.
+
+```
+Reading (anyone with an account, local or in production)
+  search a market -> Neon -> saved report -> filter, sort, re-rank
+  zero LLM calls, zero subprocesses, zero outbound requests
+
+Writing (admin, on a local machine, generation explicitly enabled)
+  request analysis -> pipeline -> local `claude` CLI -> Neon
+  the same Neon that production reads, so a market analysed on a laptop
+  is live on the deployed site with no redeploy
+```
+
+Production is **read-only by design**. `generationAvailability()` in
+[lib/access.js](lib/access.js) refuses to generate whenever `VERCEL` is
+set, whatever else is configured — the fact that `claude` and `python3`
+do not exist in a serverless runtime is an accident of the environment,
+not a control, and is not relied on. The UI asks `GET /api/session` what
+the current account may do and hides controls it cannot use, so nobody is
+offered a button that answers 403 or 503.
+
+The database fills up organically: it holds the markets people actually
+searched for and an admin chose to analyse, not a precomputed sweep of
+every industry.
+
+### Who can do what
+
+| | Anonymous | Signed-in user | Admin |
+| --- | --- | --- | --- |
+| Read the landing page | yes | yes | yes |
+| Create an account | yes | — | — |
+| Browse existing analyses | no | yes | yes |
+| Open a saved report, filter, re-rank | no | yes | yes |
+| Run or refresh an analysis | no | no | **locally only** |
+
+Admin is not a property of an account. It is derived server-side, on every
+request, from the `ADMIN_EMAILS` environment variable; there is no role
+column and nothing a signup can send that grants it. Signing up gets you
+read access and nothing else.
+
+### Refreshing without losing what you have
+
+`analysis_runs` is append-only: one row per run, the report stored as
+`jsonb`. Reads only ever select the newest row whose status is `complete`
+or `degraded`, so a run that is still going, or that failed, is invisible
+to them. The practical effect is that the previous report stays readable
+throughout a refresh and survives a refresh that fails.
 
 ## How an opportunity is prevented from being invented
 
-The LLM is never allowed to name an opportunity. It is used at three points and
-boxed in at each:
+The LLM is never allowed to name an opportunity. It is used at four points
+and boxed in at each:
 
 | Stage | What the model may do | What stops it inventing |
 | --- | --- | --- |
+| **Community proposal** (`lib/subreddits.js`) | Name subreddits where this market might talk | It only chooses *where to look*. Every suggestion is probed against the live archive and dropped unless the community exists and posted inside the window. It never sees evidence and never makes a claim about a customer |
 | **Extraction** (`lib/extract.js`) | Report a problem described in one document, and say what KIND of statement it is | It must return a quote that we verify appears **verbatim in that specific document's own title or body**. Failures are dropped and counted. Only `first_hand_problem` and `reported_problem` from someone actually in the market go on to ranking |
 | **Theme grouping** (`lib/theme.js`) | Say which already-extracted phrases describe the same problem | It can only reference phrases extraction produced. Unknown or repeated indices are discarded; anything it ignores survives on its own |
 | **Framing** (`lib/frame.js`) | Write prose for one cluster | It sees only that cluster's verified quotes — not other clusters, not the scores, not the corpus |
 
 Everything between those stages — deduplication, clustering, engagement
-normalization, scoring, ranking, and the evidence floor — is deterministic code.
+normalization, scoring, ranking, and the evidence floor — is deterministic
+code. The model never touches a score: ranking is computed before any prose
+is written, so an opportunity is the *output* of evidence rather than a
+hypothesis that went looking for some. Re-ranking with the weight sliders
+happens entirely in the browser against the saved report, with no model
+call and no server round trip.
 There is no cross-cluster synthesis step anywhere, because that is exactly where
 invention would creep in. Opportunities are 1:1 with clusters that cleared the
 floor: no evidence, no opportunity.
@@ -104,21 +166,43 @@ to the locally installed `claude` CLI — no API key for that.
 
 ## Setup
 
-The app requires accounts (Postgres-backed, via [Better Auth](https://better-auth.com))
-before it will run a search. Two environment variables are required:
+Accounts are Postgres-backed via [Better Auth](https://better-auth.com), and
+so are the analyses themselves. Copy [.env.example](.env.example) to `.env`
+and fill it in.
 
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Connection string for a [Neon](https://neon.tech) Postgres database. |
-| `BETTER_AUTH_SECRET` | Random string used to sign session cookies. |
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | local + Vercel | [Neon](https://neon.tech) Postgres. Holds both accounts and saved analyses. Point local and production at the same database — that is what makes a locally generated report appear in production. |
+| `BETTER_AUTH_SECRET` | local + Vercel | Signs session cookies. `openssl rand -base64 32`. |
+| `BETTER_AUTH_URL` | local | Where the app is reachable, e.g. `http://localhost:3000`. On Vercel it is derived from `VERCEL_PROJECT_PRODUCTION_URL`; leave it unset there. |
+| `ADMIN_EMAILS` | local | Comma-separated accounts allowed to generate. Unset means nobody can. |
+| `GENERATION_ENABLED` | local | Kill switch, fail-closed: only the literal `true` enables generation. |
+| `LAST30DAYS_SCRIPT` | local, optional | Path to the last30days plugin's `last30days.py`. Auto-detected from `~/.claude/plugins/cache/` when unset. |
+| `GITHUB_TOKEN` | local, optional | Raises the GitHub Search API ceiling from 10 to 30 req/min. |
 
-Before first use, apply Better Auth's schema to the database:
+Two schemas have to exist. Better Auth owns its own tables:
 
 ```bash
-DATABASE_URL=... BETTER_AUTH_SECRET=... npx @better-auth/cli migrate --config lib/auth.js
+npx @better-auth/cli migrate --config lib/auth.js   # accounts, sessions
+npm run migrate                                      # markets, analysis_runs
 ```
 
-Run history in `runs/` is unaffected — only accounts and sessions live in Postgres.
+`npm run migrate` applies [lib/migrations/](lib/migrations/) in filename
+order, once each, tracked in `schema_migrations`.
+
+### Generating an analysis
+
+Generation needs the local `claude` CLI on `PATH` (no API key — the AI
+stages shell out to it), `python3` for the last30days plugin, and:
+
+```bash
+ADMIN_EMAILS=you@example.com GENERATION_ENABLED=true npm start
+```
+
+Sign in as that account, search a market, and click **Analyze this
+market**. The finished report is written to Neon and is immediately
+readable everywhere, including production. `runs/*.json` is a frozen
+archive of pre-Neon runs kept as test fixtures; nothing writes to it.
 
 ## Provenance in the interface
 
@@ -207,10 +291,13 @@ measurement, the other is a finding.
 - **Reddit comment bodies are excerpts**, so a problem stated only in the
   truncated remainder of a long comment is missed.
 - **A run takes 1–5 minutes** and costs roughly $0.10–0.30 in LLM usage, almost
-  all of it in extraction. Runs are cached to `runs/<slug>.json`.
-- **`slugify` can collide**: "AI agents" and "AI-agents" map to the same cache
-  file, so one overwrites the other. The report always displays the market string
-  it was actually run for.
+  all of it in extraction. Finished runs are saved to Neon.
+- **`slugify` can collide**: "AI agents" and "AI-agents" map to the same slug,
+  so the later run becomes the current report for both. The report always
+  displays the market string it was actually run for.
+- **Generation is local-only.** There is no hosted execution path yet, so new
+  markets appear only when the maintainer runs one. See
+  [Future direction](#future-direction).
 - **Relevance filtering is a blunt instrument.** It requires two of the query's
   meaningful words within ~200 characters of each other. This removed a lot of
   genuine noise, but it will also drop posts that discuss the market without
@@ -219,8 +306,14 @@ measurement, the other is a finding.
 ## Layout
 
 ```
-server.js              node:http, SSE progress, static files
+server.js              node:http, routing, SSE progress, static files
 lib/
+  auth.js              Better Auth: signup, sign-in, sessions
+  access.js            admin allowlist, generation kill switch, rate limit
+  db.js                Neon HTTP client for runtime queries
+  store.js             markets + append-only analysis_runs
+  migrate.js           applies lib/migrations/*.sql once each
+  claude.js            the only place a model is called
   collectors/          hackernews.js, github.js (ours) · reddit.js (delegated)
   coverage.js          the honest stop
   dedupe.js            four dedup passes
@@ -233,5 +326,25 @@ lib/
   pipeline.js          the stages, in order
 public/                vanilla HTML/CSS/JS, no framework
 tests/                 unit tests, browser checks, fixture builder
+runs/                  frozen pre-Neon run archive, used as test fixtures
+scripts/               one-off admin scripts (runs/*.json -> Neon backfill)
 verification/          screenshots + verification-log.md
 ```
+
+## Future direction
+
+The missing piece is hosted generation: a signed-in user asking for a market
+nobody has analysed yet, and getting it. That needs the pipeline to run
+somewhere other than a laptop.
+
+The seam for it already exists. [lib/claude.js](lib/claude.js) is the only
+module in the project that calls a model — every AI stage goes through its
+`askForJson`, and nothing else spawns anything. Swapping the local CLI for a
+hosted agent means reimplementing that one function; scoring, storage,
+evidence verification, and the UI do not change. The second change is in
+[lib/access.js](lib/access.js), where `generationAvailability()` currently
+answers `local-only` in production and would instead dispatch to the hosted
+executor.
+
+Deliberately not built yet, because building it against an executor that
+does not exist would be guessing at its interface.
