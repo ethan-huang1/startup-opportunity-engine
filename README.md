@@ -39,13 +39,26 @@ Writing (admin, on a local machine, generation explicitly enabled)
   is live on the deployed site with no redeploy
 ```
 
-Production is **read-only by design**. `generationAvailability()` in
-[lib/access.js](lib/access.js) refuses to generate whenever `VERCEL` is
-set, whatever else is configured — the fact that `claude` and `python3`
-do not exist in a serverless runtime is an accident of the environment,
-not a control, and is not relied on. The UI asks `GET /api/session` what
-the current account may do and hides controls it cannot use, so nobody is
-offered a button that answers 403 or 503.
+Production is **read-only by configuration**, not by a hard-coded rule.
+`GENERATION_ENABLED` is the whole decision, in every environment, and it
+fails closed: unset or anything but the literal `true` means no generation.
+Leave it unset on Vercel and production serves saved reports only; set it
+to `true` there and an admin can generate, subject to every other gate.
+
+The gates, in the order the server applies them:
+
+1. **signed in** — otherwise 401;
+2. **admin** (`ADMIN_EMAILS`) — otherwise 403, in every environment;
+3. **`GENERATION_ENABLED`** — otherwise 503 `disabled`;
+4. **the `claude` CLI exists** — otherwise 503 `no-claude`. This is the one
+   a serverless runtime normally trips on: there is no CLI installed there,
+   which is a real missing dependency rather than a policy;
+5. rate limit, then the system-wide in-flight guard, then the atomic
+   per-market claim.
+
+The UI asks `GET /api/session` what the current account may do and hides
+controls it cannot use, so nobody is offered a button that answers 403 or
+503 — and it never claims the deployment is read-only when the switch is on.
 
 The database fills up organically: it holds the markets people actually
 searched for and an admin chose to analyse, not a precomputed sweep of
@@ -175,7 +188,7 @@ and fill it in.
 | `DATABASE_URL` | local + Vercel | [Neon](https://neon.tech) Postgres. Holds both accounts and saved analyses. Point local and production at the same database — that is what makes a locally generated report appear in production. |
 | `BETTER_AUTH_SECRET` | local + Vercel | Signs session cookies. `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | local | Where the app is reachable, e.g. `http://localhost:3000`. On Vercel it is derived from `VERCEL_PROJECT_PRODUCTION_URL`; leave it unset there. |
-| `ADMIN_EMAILS` | local + Vercel | Comma-separated accounts allowed to generate. Unset means nobody can. Setting it in production is safe but grants nothing today: generation is refused there regardless (`local-only`), and no other route is admin-gated. It is set there so the owner is already an admin when hosted generation arrives. |
+| `ADMIN_EMAILS` | local + Vercel | Comma-separated accounts allowed to generate. Unset means nobody can. Signing up never puts you on this list. |
 | `GENERATION_ENABLED` | local | Kill switch, fail-closed: only the literal `true` enables generation. |
 | `LAST30DAYS_SCRIPT` | local, optional | Path to the last30days plugin's `last30days.py`. Auto-detected from `~/.claude/plugins/cache/` when unset. |
 | `GITHUB_TOKEN` | local, optional | Raises the GitHub Search API ceiling from 10 to 30 req/min. |
@@ -295,8 +308,11 @@ measurement, the other is a finding.
 - **`slugify` can collide**: "AI agents" and "AI-agents" map to the same slug,
   so the later run becomes the current report for both. The report always
   displays the market string it was actually run for.
-- **Generation is local-only.** There is no hosted execution path yet, so new
-  markets appear only when the maintainer runs one. See
+- **Generation needs the `claude` CLI on the machine running the server.**
+  Nothing stops you enabling it in production, but a serverless runtime has
+  no CLI to run, so it answers 503 `no-claude` — and a run takes minutes,
+  well past a serverless function's execution limit. In practice new markets
+  appear when the maintainer runs one locally. See
   [Future direction](#future-direction).
 - **Relevance filtering is a blunt instrument.** It requires two of the query's
   meaningful words within ~200 characters of each other. This removed a lot of
@@ -344,9 +360,10 @@ other subprocess in the codebase is `python3` for the Reddit collector,
 which fetches data and calls no model.) Swapping the local CLI for a hosted
 agent means reimplementing that one function; scoring, storage, evidence
 verification, and the UI do not change. The second change is in
-[lib/access.js](lib/access.js), where `generationAvailability()` currently
-answers `local-only` in production and would instead dispatch to the hosted
-executor.
+[lib/access.js](lib/access.js) only if the executor needs its own switch —
+`generationAvailability()` is already environment-agnostic, so a hosted
+executor that satisfies `isClaudeAvailable()`'s role would need no change
+there at all.
 
 Deliberately not built yet, because building it against an executor that
 does not exist would be guessing at its interface.

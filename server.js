@@ -187,8 +187,8 @@ async function route(request, response) {
   // see the new run until it finishes (see lib/store.js's getReport).
   if (request.method === 'POST' && url.pathname === '/api/analyses') {
     // Fail-closed kill switch: checked before anything that scrapes or makes
-    // an outbound request, not just before the LLM call. In production this
-    // refuses unconditionally — the absent `claude` binary is not the control.
+    // an outbound request, not just before the LLM call. Applies in every
+    // environment, production included — see generationAvailability().
     const availability = generationAvailability();
     if (!availability.available) {
       sendJson(response, 503, {
@@ -197,9 +197,16 @@ async function route(request, response) {
       });
       return;
     }
+    // The last preflight before anything costs money or makes an outbound
+    // request. This is what a serverless runtime trips on: generation shells
+    // out to the `claude` CLI, which is not installed there. That is a real
+    // missing dependency, reported plainly — the policy decision is the kill
+    // switch above, not this.
     if (!(await isClaudeAvailable())) {
       sendJson(response, 503, {
-        error: 'The claude CLI is not installed or not on PATH here.',
+        error:
+          'Generation is enabled, but the `claude` CLI is not installed or not on PATH in ' +
+          'this environment, so there is nothing to run the AI stages with.',
         reason: 'no-claude',
       });
       return;

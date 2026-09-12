@@ -39,28 +39,37 @@ test('isAdminRoute: reading saved analyses is open to any signed-in account', ()
   assert.equal(isAdminRoute('/app.js'), false);
 });
 
-test('generationAvailability: production refuses regardless of the kill switch', () => {
-  // The absent `claude` binary on Vercel is an accident of the runtime, not
-  // a control. Even with GENERATION_ENABLED=true, serverless must refuse.
-  assert.deepEqual(
-    generationAvailability({ enabled: true, serverless: true }),
-    { available: false, reason: 'local-only' },
-  );
-  assert.deepEqual(
-    generationAvailability({ enabled: false, serverless: true }),
-    { available: false, reason: 'local-only' },
-  );
+test('generationAvailability: the kill switch is the whole decision', () => {
+  assert.deepEqual(generationAvailability({ enabled: false }), {
+    available: false,
+    reason: 'disabled',
+  });
+  assert.deepEqual(generationAvailability({ enabled: true }), {
+    available: true,
+    reason: null,
+  });
 });
 
-test('generationAvailability: locally it follows the kill switch', () => {
-  assert.deepEqual(
-    generationAvailability({ enabled: false, serverless: false }),
-    { available: false, reason: 'disabled' },
-  );
-  assert.deepEqual(
-    generationAvailability({ enabled: true, serverless: false }),
-    { available: true, reason: null },
-  );
+test('generationAvailability: the deployment environment does not override the switch', () => {
+  // Regression. This used to refuse whenever VERCEL was set, which made the
+  // switch unreachable in production — GENERATION_ENABLED=true there had no
+  // effect at all. Whether generation is on is configuration, not a verdict
+  // derived from the hostname.
+  const previous = process.env.VERCEL;
+  process.env.VERCEL = '1';
+  try {
+    assert.deepEqual(generationAvailability({ enabled: true }), {
+      available: true,
+      reason: null,
+    });
+    assert.deepEqual(generationAvailability({ enabled: false }), {
+      available: false,
+      reason: 'disabled',
+    });
+  } finally {
+    if (previous === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = previous;
+  }
 });
 
 test('parseGenerationEnabled: fails closed for everything except the literal string "true"', () => {

@@ -18,9 +18,12 @@ side or the other:
   filtering, sorting, and re-ranking. **No model call, no subprocess, no
   outbound request may ever appear on this path** — `tests/no-claude-on-read.test.js`
   asserts it by mocking `spawn` and `fetch` to throw.
-- **Write path** (admin only, local machine only): `POST /api/analyses` ->
-  `lib/pipeline.js` -> the local `claude` CLI -> Neon. Refused outright when
-  `VERCEL` is set, regardless of any other configuration.
+- **Write path** (admin only): `POST /api/analyses` -> `lib/pipeline.js` ->
+  the `claude` CLI -> Neon. Gated by `ADMIN_EMAILS` and then by
+  `GENERATION_ENABLED`, which fails closed and applies in every environment.
+  The environment itself is not a gate — that was a bug, because it made the
+  switch unreachable in production. What actually stops a serverless
+  deployment generating is that it has no `claude` CLI (503 `no-claude`).
 
 - [server.js](server.js): HTTP routing, SSE progress stream, error boundary.
 - [lib/auth.js](lib/auth.js): Better Auth. Signup is open; it grants read access only.

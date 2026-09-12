@@ -46,9 +46,13 @@ const state = {
 };
 
 /**
- * Generation is admin-only AND local-only. The server enforces both; this
- * only decides whether to show a control, so that nobody is offered a
- * button that answers 403 or 503.
+ * Generation needs two things: an admin account, and the deployment's kill
+ * switch on. The server enforces both; this only decides whether to show a
+ * control, so nobody is offered a button that answers 403 or 503.
+ *
+ * Deliberately not conditioned on the environment. Whether generation works
+ * here is a question about configuration, which /api/session answers — the
+ * UI does not guess from the hostname.
  */
 function canGenerate() {
   return Boolean(state.capabilities?.isAdmin && state.capabilities?.generation?.available);
@@ -946,12 +950,18 @@ function showNotAnalyzed(market) {
     return;
   }
 
-  const reason = state.capabilities?.generation?.message;
+  // Why they cannot generate depends on which of the two conditions failed,
+  // and the honest answer differs: an admin is looking at a switch that is
+  // off, an ordinary account at a permission it does not have. Neither may
+  // claim this deployment only serves saved reports — with the switch on,
+  // that is no longer true of production either.
+  const note = state.capabilities?.isAdmin
+    ? state.capabilities?.generation?.message
+    : 'New analyses are added by the maintainer.';
+
   status.appendChild(el('p', {
     class: 'control-note',
-    text: reason
-      ? `${reason} Browse the analyses that already exist below.`
-      : 'Browse the analyses that already exist below.',
+    text: `${note ? `${note} ` : ''}Browse the analyses that already exist below.`,
   }));
 }
 

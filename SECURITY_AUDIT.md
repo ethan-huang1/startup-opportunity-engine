@@ -150,3 +150,23 @@ filesystem path reaches a client.
 - **`runs/*.json` and the two large session transcripts at the repository
   root** are historical artefacts, not live data. The runs are load-bearing
   test fixtures; the transcripts are not, and could be removed.
+
+### Amendment: the production generation block was removed (deliberately)
+
+Finding 6's remediation above described the brake as
+`generationAvailability()` returning `local-only` whenever `VERCEL` was
+set. That check was removed at the owner's request, because it made the
+kill switch unreachable in production: setting `GENERATION_ENABLED=true`
+on Vercel changed nothing, since the environment check ran first.
+
+Generation in production is now gated by, in order: authentication,
+`ADMIN_EMAILS`, `GENERATION_ENABLED` (fail-closed), the presence of the
+`claude` CLI, a per-account rate limit, and the atomic per-market claim.
+The admin check was not touched and generation is not publicly reachable —
+`tests/production-generation.test.js` asserts the full matrix against the
+real route with `VERCEL` set.
+
+Net posture change: with `GENERATION_ENABLED` unset or `false` on Vercel —
+the default, and the current configuration — production is exactly as
+closed as before. With it set to `true`, one allowlisted admin account can
+trigger a run there, which is the intended behaviour.
