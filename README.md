@@ -175,7 +175,7 @@ and fill it in.
 | `DATABASE_URL` | local + Vercel | [Neon](https://neon.tech) Postgres. Holds both accounts and saved analyses. Point local and production at the same database — that is what makes a locally generated report appear in production. |
 | `BETTER_AUTH_SECRET` | local + Vercel | Signs session cookies. `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | local | Where the app is reachable, e.g. `http://localhost:3000`. On Vercel it is derived from `VERCEL_PROJECT_PRODUCTION_URL`; leave it unset there. |
-| `ADMIN_EMAILS` | local | Comma-separated accounts allowed to generate. Unset means nobody can. |
+| `ADMIN_EMAILS` | local + Vercel | Comma-separated accounts allowed to generate. Unset means nobody can. Setting it in production is safe but grants nothing today: generation is refused there regardless (`local-only`), and no other route is admin-gated. It is set there so the owner is already an admin when hosted generation arrives. |
 | `GENERATION_ENABLED` | local | Kill switch, fail-closed: only the literal `true` enables generation. |
 | `LAST30DAYS_SCRIPT` | local, optional | Path to the last30days plugin's `last30days.py`. Auto-detected from `~/.claude/plugins/cache/` when unset. |
 | `GITHUB_TOKEN` | local, optional | Raises the GitHub Search API ceiling from 10 to 30 req/min. |
