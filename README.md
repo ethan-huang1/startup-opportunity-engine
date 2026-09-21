@@ -14,7 +14,12 @@ code before any prose gets written.
 
 **Live: https://startup-opportunity-engine.vercel.app**
 
-Browsing saved analyses is free and needs no account.
+The public site is a read-only demo. It serves the analyses I have already
+generated, and anyone can browse and open them with no account. It cannot
+start a new analysis, because generation runs the `claude` CLI as a
+subprocess and there is no CLI in a serverless runtime. New markets appear
+when I run the pipeline on my laptop against the same database. See
+[Limitations](#limitations).
 
 ![The landing page, with saved analyses you can open instantly](docs/landing.png)
 
@@ -58,8 +63,11 @@ the model prose at once and leaves a pure evidence view.
 - **Honest failure states.** Collecting 115 posts and failing to read all of
   them is different from reading them and finding nothing. The app keeps
   `unknown` and `insufficient` as separate verdicts.
-- **Three free analyses per visitor**, counted in Postgres against an HttpOnly
-  cookie, with a per-network daily backstop. Reading is unmetered.
+- **A three-analysis allowance per visitor**, counted in Postgres against an
+  HttpOnly cookie with a per-network daily backstop, so the cost of generating
+  is capped without putting a signup wall in front of reading. It is built and
+  tested, and it is what bounds generation when I run the app locally. The
+  public deployment never reaches it, because it cannot generate at all.
 
 ## How it works
 
@@ -87,7 +95,7 @@ synthesis step anywhere, because that is where invention would creep in.
 
 Reading and generating are treated very differently on purpose. Generating a
 report is slow and costs money. Reading one is a single database query with no
-model in the path, which is why the whole site is open with no account.
+model in the path, which is why reading is open to everyone with no account.
 
 ## Tech stack
 
@@ -145,12 +153,14 @@ All the environment variables are documented in [.env.example](.env.example).
 
 These are real and I would rather say them than have you find them.
 
-- **The live site cannot generate new analyses.** Generation shells out to the
-  local `claude` CLI, and a Vercel serverless function has no CLI to run and
-  would time out on a multi-minute pipeline anyway, so it answers `503`. New
-  markets appear when I run the pipeline on my laptop against the same Neon
-  database. Browsing and reading work fine for everyone. Making generation work
-  in production is the main thing left to build, and
+- **The live site cannot generate new analyses, so treat it as a demo of the
+  output rather than a working tool.** Generation shells out to the local
+  `claude` CLI, and a Vercel serverless function has no CLI to run and would
+  time out on a multi-minute pipeline anyway. Generation is therefore switched
+  off in production, and the site does not offer a control that would fail.
+  Browsing and reading work fully for everyone. New markets appear when I run
+  the pipeline on my laptop against the same Neon database. Making generation
+  work in production is the main thing left to build, and
   [lib/claude.js](lib/claude.js) is the one file that would have to change.
 - **The sources are biased.** Reddit, Hacker News, and GitHub skew hard toward
   developers and early adopters. For HVAC contractors, dental practices, or
