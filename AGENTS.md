@@ -13,21 +13,27 @@ This repository is the Startup Opportunity Discovery Engine: a deterministic evi
 Read and write are deliberately asymmetric, and most changes belong on one
 side or the other:
 
-- **Read path** (any signed-in account, local and production): search or
-  click a market -> `GET /api/runs*` -> Neon -> saved report -> client-side
-  filtering, sorting, and re-ranking. **No model call, no subprocess, no
-  outbound request may ever appear on this path** — `tests/no-claude-on-read.test.js`
-  asserts it by mocking `spawn` and `fetch` to throw.
-- **Write path** (admin only): `POST /api/analyses` -> `lib/pipeline.js` ->
-  the `claude` CLI -> Neon. Gated by `ADMIN_EMAILS` and then by
-  `GENERATION_ENABLED`, which fails closed and applies in every environment.
-  The environment itself is not a gate — that was a bug, because it made the
-  switch unreachable in production. What actually stops a serverless
-  deployment generating is that it has no `claude` CLI (503 `no-claude`).
+- **Read path** (anyone with the link — no account, local and production):
+  search or click a market -> `GET /api/runs*` -> Neon -> saved report ->
+  client-side filtering, sorting, and re-ranking. **No model call, no
+  subprocess, no outbound request may ever appear on this path** —
+  `tests/no-claude-on-read.test.js` asserts it by mocking `spawn` and
+  `fetch` to throw. Reads are also never metered.
+- **Write path** (anyone, three times; admins unmetered): `POST
+  /api/analyses` -> `lib/pipeline.js` -> the `claude` CLI -> Neon. Metered
+  rather than gated: `lib/usage.js` counts a visitor's searches in Postgres
+  against an `HttpOnly` cookie, with a per-IP/day backstop, and
+  `ADMIN_EMAILS` is now only an exemption from that meter.
+  `GENERATION_ENABLED` is still the global kill switch above everything,
+  fails closed, and applies in every environment. The environment itself is
+  not a gate — that was a bug, because it made the switch unreachable in
+  production. What actually stops a serverless deployment generating is
+  that it has no `claude` CLI (503 `no-claude`).
 
 - [server.js](server.js): HTTP routing, SSE progress stream, error boundary.
-- [lib/auth.js](lib/auth.js): Better Auth. Signup is open; it grants read access only.
+- [lib/auth.js](lib/auth.js): Better Auth. Sign-in is optional and grants nothing an anonymous visitor lacks; its only purpose is reaching an `ADMIN_EMAILS` address.
 - [lib/access.js](lib/access.js): admin allowlist, generation kill switch, rate limit.
+- [lib/usage.js](lib/usage.js): the visitor cookie and the three-free-searches meter. The enforcement point is an atomic conditional `UPDATE`, never a client-side count.
 - [lib/store.js](lib/store.js): markets + append-only analysis_runs; reads only ever see the newest completed run.
 - [lib/db.js](lib/db.js): Neon HTTP client for runtime queries.
 - [lib/claude.js](lib/claude.js): the only module that calls a model. The swap point for hosted generation later.
@@ -48,7 +54,7 @@ side or the other:
 Use these commands from the repository root:
 
 ```bash
-npm test              # the Node.js test suite (112 tests, none skipped)
+npm test              # the Node.js test suite (144 tests, none skipped)
 npm start             # http://localhost:3000; loads .env
 npm run migrate       # apply lib/migrations/*.sql to Neon
 npm run test:browser  # browser checks; needs a running server and a fixture
@@ -63,7 +69,11 @@ Notes:
 - Many investigations and fixes are best validated with the relevant unit test, not by guesswork.
 - **Never let a test drive `POST /api/analyses` with generation enabled.**
   It spends real money. Mock `child_process.spawn` to *throw* rather than to
-  return a fake, so an unexpected call fails loudly.
+  return a fake, so an unexpected call fails loudly. `tests/quota.test.js`
+  and `tests/production-generation.test.js` both send the deliberately
+  invalid market `"ab"` so the route is exercised right up to validation and
+  no further; read the SAFETY note at the top of either before editing them.
+  Note that `mock.restoreAll()` disarms the `spawn` guard — re-arm it.
 
 ## Important conventions
 

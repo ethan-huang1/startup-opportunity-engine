@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 
 import {
   parseAdminEmails,
-  isAdminRoute,
   parseGenerationEnabled,
   generationAvailability,
   checkRateLimit,
@@ -21,22 +20,6 @@ test('parseAdminEmails: trims whitespace and lowercases', () => {
   assert.ok(admins.has('owner@example.com'));
   assert.ok(admins.has('second@example.com'));
   assert.equal(admins.size, 2);
-});
-
-test('isAdminRoute: generation is admin-only', () => {
-  assert.equal(isAdminRoute('/api/analyses'), true);
-});
-
-test('isAdminRoute: reading saved analyses is open to any signed-in account', () => {
-  // Reads are the product. Only writing a report costs money, so only
-  // writing is restricted — a normal user must be able to open these.
-  assert.equal(isAdminRoute('/api/runs'), false);
-  assert.equal(isAdminRoute('/api/runs/some-market'), false);
-  assert.equal(isAdminRoute('/api/session'), false);
-  assert.equal(isAdminRoute('/api/fixture'), false);
-  assert.equal(isAdminRoute('/api/auth/get-session'), false);
-  assert.equal(isAdminRoute('/'), false);
-  assert.equal(isAdminRoute('/app.js'), false);
 });
 
 test('generationAvailability: the kill switch is the whole decision', () => {
@@ -114,7 +97,7 @@ test('checkRateLimit: a request outside the window is allowed again', async () =
  * import after setting it exercises the real end-to-end wiring — the exact
  * three-tier matrix (anonymous, non-admin, admin) server.js relies on.
  */
-test('isAdminEmail: anonymous, non-admin, and admin sessions are classified correctly', async () => {
+test('isAdminEmail: anonymous, non-admin, and admin visitors are classified correctly', async () => {
   process.env.ADMIN_EMAILS = 'Owner@Example.com';
   const { isAdminEmail } = await import(`../lib/access.js?test-admin-emails`);
 
@@ -122,7 +105,7 @@ test('isAdminEmail: anonymous, non-admin, and admin sessions are classified corr
   assert.equal(isAdminEmail(undefined), false);
   assert.equal(isAdminEmail(null), false);
 
-  // Authenticated, but not the admin.
+  // Authenticated, but not the admin. Same three free searches as anyone.
   assert.equal(isAdminEmail('random-signup@example.com'), false);
 
   // The admin — case- and whitespace-insensitive, matching how Better Auth

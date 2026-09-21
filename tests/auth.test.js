@@ -1,10 +1,15 @@
 /**
- * End-to-end signup, sign-in, and the permission matrix, against a real
- * ephemeral server and the real Neon database.
+ * End-to-end signup, sign-in, and what an account is actually for, against
+ * a real ephemeral server and the real Neon database.
  *
- * The whole point of this file is the boundary between a normal account and
- * an admin one, so nothing here is mocked except the one thing that must
- * never happen: child_process.spawn. If any assertion below accidentally
+ * Signing in is optional now: reading and the three free searches both work
+ * anonymously (tests/quota.test.js). What remains worth asserting here is
+ * that an account can be created and used, that it can never escalate
+ * itself to admin, and that ADMIN_EMAILS is the only thing that confers the
+ * one privilege there is — an exemption from the search meter.
+ *
+ * Nothing here is mocked except the one thing that must never happen:
+ * child_process.spawn. If any assertion below accidentally
  * reaches the pipeline, the test fails loudly instead of quietly making
  * billed `claude` calls (which is exactly how an earlier version of
  * tests/no-claude-on-read.test.js burned real money).
@@ -39,10 +44,10 @@ before(async () => {
 
   process.env.BETTER_AUTH_URL = base;
   process.env.ADMIN_EMAILS = ADMIN_EMAIL;
-  // Forced off: this file proves who is *authorized* to generate, never that
-  // generation runs. An admin therefore gets 503 (the kill switch) where a
-  // normal user gets 403 (authorization) — two different refusals, which is
-  // precisely the distinction being asserted.
+  // Forced off for the whole file: nothing here needs generation to run,
+  // and the switch failing closed is the cheapest possible guarantee that
+  // it cannot. Every generation attempt below therefore lands on 503
+  // `disabled`, whoever makes it.
   process.env.GENERATION_ENABLED = 'false';
   delete process.env.VERCEL;
 
@@ -143,7 +148,9 @@ test('signing in works with the right password and fails with the wrong one', db
   assert.notEqual(bad.status, 200, 'a wrong password must not produce a session');
 
   const anonymous = await client().request('/api/session');
-  assert.equal(anonymous.status, 401, 'no session means no API access');
+  assert.equal(anonymous.status, 200, 'no session is the normal case, not a refusal');
+  assert.equal(anonymous.body.email, null);
+  assert.equal(anonymous.body.isAdmin, false);
 });
 
 /* --------------------------------------------------------- normal user */
@@ -171,6 +178,18 @@ test('signing up never grants admin, even if the request asks for it', dbTest, a
   const session = await user.request('/api/session');
   assert.equal(session.body.isAdmin, false);
   assert.equal(session.body.generation.available, false);
+  assert.equal(session.body.quota.unlimited, false);
+});
+
+test('an ordinary account gets exactly what an anonymous visitor gets', dbTest, async () => {
+  const user = client();
+  await user.signIn(USER_EMAIL);
+  const signedIn = await user.request('/api/session');
+  const anonymous = await client().request('/api/session');
+
+  assert.equal(signedIn.body.isAdmin, false);
+  assert.equal(signedIn.body.quota.unlimited, false, 'an account is not a way around the meter');
+  assert.equal(signedIn.body.quota.limit, anonymous.body.quota.limit);
 });
 
 test('a normal user can read saved analyses', dbTest, async () => {
@@ -186,7 +205,7 @@ test('a normal user can read saved analyses', dbTest, async () => {
   assert.equal(missing.body.error, 'not_analyzed');
 });
 
-test('a normal user cannot generate: 403, before any kill-switch check', dbTest, async () => {
+test('a normal user is stopped by the kill switch, same as anyone', dbTest, async () => {
   const user = client();
   await user.signIn(USER_EMAIL);
 
@@ -194,32 +213,46 @@ test('a normal user cannot generate: 403, before any kill-switch check', dbTest,
     method: 'POST',
     body: { market: 'some market nobody has analyzed' },
   });
-  assert.equal(attempt.status, 403);
-  assert.match(attempt.body.error, /admin/i);
+  // 503, not 403: there is no authorization gate on generation any more,
+  // only the switch and the meter. With the switch off, the switch wins —
+  // and crucially, this costs the account none of its three searches.
+  assert.equal(attempt.status, 503);
+  assert.equal(attempt.body.reason, 'disabled');
+
+  const after = await user.request('/api/session');
+  assert.equal(after.body.quota.remaining, 3, 'a refusal by the switch spends nothing');
 });
 
 /* --------------------------------------------------------------- admin */
 
-test('an admin passes authorization and is stopped only by the kill switch', dbTest, async () => {
+test('an admin is unmetered and is stopped only by the kill switch', dbTest, async () => {
   const admin = client();
   const signUp = await admin.signUp(ADMIN_EMAIL);
   assert.equal(signUp.status, 200, signUp.text);
 
   const session = await admin.request('/api/session');
   assert.equal(session.body.isAdmin, true, 'ADMIN_EMAILS is what confers admin');
+  assert.deepEqual(session.body.quota, { unlimited: true }, 'and admin means unmetered');
 
   const attempt = await admin.request('/api/analyses', {
     method: 'POST',
     body: { market: 'some market nobody has analyzed' },
   });
-  // 503, not 403: authorization passed and GENERATION_ENABLED stopped it.
+  // The switch outranks admin: being the maintainer is an exemption from
+  // the meter, not from the kill switch.
   assert.equal(attempt.status, 503);
   assert.equal(attempt.body.reason, 'disabled');
 });
 
-test('GET on the generation route is not a way around POST-only', dbTest, async () => {
+test('GET on the generation route does not generate anything', dbTest, async () => {
   const user = client();
   await user.signIn(USER_EMAIL);
   const attempt = await user.request('/api/analyses');
-  assert.equal(attempt.status, 403, 'still admin-gated regardless of method');
+  // Only the POST branch generates; a GET falls through to the static
+  // handler and finds no such file. Either way nothing runs and nothing
+  // is spent.
+  assert.equal(attempt.status, 404);
+
+  const after = await user.request('/api/session');
+  assert.equal(after.body.quota.remaining, 3);
 });

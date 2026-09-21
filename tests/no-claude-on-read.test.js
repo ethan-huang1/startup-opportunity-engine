@@ -41,7 +41,19 @@ function fakeResponse() {
   // trying to send a 500, and a fake that never sets it would let the
   // boundary write a second set of headers onto a response that already
   // has them.
-  const res = { statusCode: null, body: '', writableEnded: false, headersSent: false };
+  const res = {
+    statusCode: null,
+    body: '',
+    writableEnded: false,
+    headersSent: false,
+    headers: {},
+  };
+  // The real server sets the visitor cookie with setHeader() before any
+  // writeHead(), relying on Node merging the two. A fake without it makes
+  // every route throw on the first line that touches the response.
+  res.setHeader = (name, value) => {
+    res.headers[name] = value;
+  };
   res.writeHead = (status) => {
     res.statusCode = status;
     res.headersSent = true;

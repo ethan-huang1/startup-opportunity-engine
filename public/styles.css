@@ -184,6 +184,13 @@ button {
   color: var(--ink-faint);
 }
 
+/* A spent allowance is a fact worth noticing, not an error banner: the
+   rest of the app still works, so it stays a hint and only changes colour. */
+.search-hint.spent {
+  color: var(--stop);
+  font-weight: 600;
+}
+
 /* ---------- auth ---------- */
 
 .account-bar:not([hidden]) {

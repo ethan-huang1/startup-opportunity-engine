@@ -14,7 +14,7 @@ opportunities and staples citations on afterward.
 npm install
 npm run migrate          # apply lib/migrations/*.sql to Neon (once)
 npm start                # http://localhost:3000
-npm test                 # the Node test suite (112 tests)
+npm test                 # the Node test suite (144 tests)
 npm run test:browser     # browser checks against a running server
 ```
 
@@ -29,55 +29,98 @@ that asymmetry: a completed analysis is written once, to Postgres, and
 every read after that is a database query with no model in the path.
 
 ```
-Reading (anyone with an account, local or in production)
+Reading (anyone with the link — no account, local or in production)
   search a market -> Neon -> saved report -> filter, sort, re-rank
   zero LLM calls, zero subprocesses, zero outbound requests
 
-Writing (admin, on a local machine, generation explicitly enabled)
+Writing (anyone with the link, three times; admins without limit)
   request analysis -> pipeline -> local `claude` CLI -> Neon
   the same Neon that production reads, so a market analysed on a laptop
   is live on the deployed site with no redeploy
 ```
 
-Production is **read-only by configuration**, not by a hard-coded rule.
-`GENERATION_ENABLED` is the whole decision, in every environment, and it
-fails closed: unset or anything but the literal `true` means no generation.
-Leave it unset on Vercel and production serves saved reports only; set it
-to `true` there and an admin can generate, subject to every other gate.
+No sign-in is required for any of it. Reading costs nothing to serve, so
+putting a signup form in front of it only stopped people looking. Writing
+costs real money, so it is **metered rather than gated**: a visitor gets
+three new analyses, counted in Postgres.
 
-The gates, in the order the server applies them:
+`GENERATION_ENABLED` remains the global kill switch, above everything else
+including admin. It is the whole decision about whether this deployment
+generates at all, in every environment, and it fails closed: unset or
+anything but the literal `true` means no generation.
 
-1. **signed in** — otherwise 401;
-2. **admin** (`ADMIN_EMAILS`) — otherwise 403, in every environment;
-3. **`GENERATION_ENABLED`** — otherwise 503 `disabled`;
-4. **the `claude` CLI exists** — otherwise 503 `no-claude`. This is the one
+The gates on `POST /api/analyses`, in the order the server applies them:
+
+1. **same-origin** — a cross-site POST is refused 403, so no third-party
+   page can spend visitors' allowances or this deployment's budget. A
+   request with no `Origin` at all (curl) is allowed through to the meter;
+2. **`GENERATION_ENABLED`** — otherwise 503 `disabled`;
+3. **the `claude` CLI exists** — otherwise 503 `no-claude`. This is the one
    a serverless runtime normally trips on: there is no CLI installed there,
    which is a real missing dependency rather than a policy;
-5. rate limit, then the system-wide in-flight guard, then the atomic
-   per-market claim.
+4. **free searches remaining** — otherwise 429 `quota`. A read-only check,
+   so the refusal is immediate;
+5. rate limit (per network), then market validation, then the system-wide
+   in-flight guard;
+6. **the allowance is actually spent** — an atomic conditional `UPDATE`, so
+   two requests racing on the last search cannot both win;
+7. the atomic per-market claim.
 
-The UI asks `GET /api/session` what the current account may do and hides
-controls it cannot use, so nobody is offered a button that answers 403 or
-503 — and it never claims the deployment is read-only when the switch is on.
+Nothing above step 6 costs a visitor anything: a bad query, a flipped kill
+switch or a busy server are all free refusals, and losing the race for a
+market that someone else just claimed is refunded.
+
+The UI asks `GET /api/session` what this visitor may do — including how
+many searches are left — and hides controls it cannot use, so nobody is
+offered a button that answers 429 or 503.
 
 The database fills up organically: it holds the markets people actually
-searched for and an admin chose to analyse, not a precomputed sweep of
-every industry.
+searched for, not a precomputed sweep of every industry.
 
 ### Who can do what
 
-| | Anonymous | Signed-in user | Admin |
+| | Visitor (no account) | Signed-in user | Admin |
 | --- | --- | --- | --- |
 | Read the landing page | yes | yes | yes |
+| Browse existing analyses | yes | yes | yes |
+| Open a saved report, filter, re-rank | yes | yes | yes |
+| Run or refresh an analysis | **3 total** | **3 total** | unlimited |
 | Create an account | yes | — | — |
-| Browse existing analyses | no | yes | yes |
-| Open a saved report, filter, re-rank | no | yes | yes |
-| Run or refresh an analysis | no | no | **locally only** |
 
-Admin is not a property of an account. It is derived server-side, on every
-request, from the `ADMIN_EMAILS` environment variable; there is no role
-column and nothing a signup can send that grants it. Signing up gets you
-read access and nothing else.
+An account is worth nothing on its own — it gets the same three searches an
+anonymous visitor gets. Its only purpose is to be listed in `ADMIN_EMAILS`,
+which lifts the meter so the maintainer can test. Admin is not a property
+of an account: it is derived server-side, on every request, from the
+environment variable. There is no role column and nothing a signup can send
+that grants it.
+
+### How the three free searches are counted
+
+Not in the browser. The first response of any kind sets an `HttpOnly`
+`soe_visitor` cookie holding an opaque UUID and nothing else — no count, so
+there is nothing in it worth forging — and every increment is a row in
+Postgres. Reloading, clearing the page's state, or calling `POST
+/api/analyses` straight from curl all land on the same row.
+
+Two counters back it up ([lib/usage.js](lib/usage.js)):
+
+| Key | Limit | What it is for |
+| --- | --- | --- |
+| `v:<uuid>` | 3, lifetime | the visitor's allowance, and the number the UI reports |
+| `ip:<hash>:<date>` | 10 per day | a backstop, so clearing the cookie in a loop does not mint unlimited quotas |
+
+The address is hashed — the counter needs to tell two networks apart, not
+know who either of them is — and the date is part of the key so an honest
+shared network (an office, a campus, CGNAT) recovers the next day.
+
+This is a cost brake, not identity. Someone determined can still cycle
+cookies across networks. The upgrade path, if that ever matters, is
+requiring an account to generate — which the Better Auth setup already here
+would give almost for free — not a fingerprinting stack.
+
+**Viewing costs nothing.** Opening a report, refreshing the page, following
+a `?run=` link, and browsing the explore list are all plain database reads;
+a visitor who only reads never gets a counter row at all.
 
 ### Refreshing without losing what you have
 
@@ -179,17 +222,18 @@ to the locally installed `claude` CLI — no API key for that.
 
 ## Setup
 
-Accounts are Postgres-backed via [Better Auth](https://better-auth.com), and
-so are the analyses themselves. Copy [.env.example](.env.example) to `.env`
-and fill it in.
+The analyses, the free-search counters, and the (optional) accounts all
+live in the same Postgres; accounts are handled by
+[Better Auth](https://better-auth.com). Copy [.env.example](.env.example)
+to `.env` and fill it in.
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | local + Vercel | [Neon](https://neon.tech) Postgres. Holds both accounts and saved analyses. Point local and production at the same database — that is what makes a locally generated report appear in production. |
+| `DATABASE_URL` | local + Vercel | [Neon](https://neon.tech) Postgres. Holds saved analyses, free-search counters, and accounts. Point local and production at the same database — that is what makes a locally generated report appear in production. |
 | `BETTER_AUTH_SECRET` | local + Vercel | Signs session cookies. `openssl rand -base64 32`. |
 | `BETTER_AUTH_URL` | local | Where the app is reachable, e.g. `http://localhost:3000`. On Vercel it is derived from `VERCEL_PROJECT_PRODUCTION_URL`; leave it unset there. |
-| `ADMIN_EMAILS` | local + Vercel | Comma-separated accounts allowed to generate. Unset means nobody can. Signing up never puts you on this list. |
-| `GENERATION_ENABLED` | local | Kill switch, fail-closed: only the literal `true` enables generation. |
+| `ADMIN_EMAILS` | local + Vercel | Comma-separated accounts exempt from the three-search meter. Unset means everyone is metered, which is a safe default. Signing up never puts you on this list. |
+| `GENERATION_ENABLED` | local + Vercel | Global kill switch, fail-closed: only the literal `true` enables generation, for anyone, admin included. |
 | `LAST30DAYS_SCRIPT` | local, optional | Path to the last30days plugin's `last30days.py`. Auto-detected from `~/.claude/plugins/cache/` when unset. |
 | `GITHUB_TOKEN` | local, optional | Raises the GitHub Search API ceiling from 10 to 30 req/min. |
 
@@ -212,8 +256,9 @@ stages shell out to it), `python3` for the last30days plugin, and:
 ADMIN_EMAILS=you@example.com GENERATION_ENABLED=true npm start
 ```
 
-Sign in as that account, search a market, and click **Analyze this
-market**. The finished report is written to Neon and is immediately
+Search a market and click **Analyze this market**. That works without an
+account — it just spends one of three. Sign in as the `ADMIN_EMAILS`
+address to generate without a limit. The finished report is written to Neon and is immediately
 readable everywhere, including production. `runs/*.json` is a frozen
 archive of pre-Neon runs kept as test fixtures; nothing writes to it.
 
@@ -324,8 +369,9 @@ measurement, the other is a finding.
 ```
 server.js              node:http, routing, SSE progress, static files
 lib/
-  auth.js              Better Auth: signup, sign-in, sessions
+  auth.js              Better Auth: optional signup, sign-in, sessions
   access.js            admin allowlist, generation kill switch, rate limit
+  usage.js             visitor cookie + the three-free-searches meter
   db.js                Neon HTTP client for runtime queries
   store.js             markets + append-only analysis_runs
   migrate.js           applies lib/migrations/*.sql once each
@@ -351,7 +397,12 @@ verification/          screenshots + verification-log.md
 
 The missing piece is hosted generation: a signed-in user asking for a market
 nobody has analysed yet, and getting it. That needs the pipeline to run
-somewhere other than a laptop.
+somewhere other than a laptop — and it is the one thing the public
+deployment still cannot do. Everything else works for a visitor with the
+link: the three-search meter is enforced there, but a serverless runtime
+has no `claude` CLI, so generation answers 503 `no-claude` until this
+exists. In production the app browses and reads; new analyses are still
+generated from a laptop against the same Neon.
 
 The seam for it already exists. [lib/claude.js](lib/claude.js) is the only
 module in the project that calls a model: all four AI stages go through its

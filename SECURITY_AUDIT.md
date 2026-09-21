@@ -170,3 +170,51 @@ Net posture change: with `GENERATION_ENABLED` unset or `false` on Vercel —
 the default, and the current configuration — production is exactly as
 closed as before. With it set to `true`, one allowlisted admin account can
 trigger a run there, which is the intended behaviour.
+
+### Amendment: generation is now public but metered (deliberately)
+
+Finding 1's remediation was an `ADMIN_EMAILS` allowlist on the generation
+route, and Finding 2's was to consider closing signup. Both were built.
+The product goal has since changed: the app is published so anyone with
+the link can try it, which means the allowlist can no longer be the gate.
+
+Authorization was replaced with **metering**, not removed:
+
+- **Reads and the page are open to everyone, with no account.** They cost
+  nothing to serve and call no model — that was already true, the signup
+  wall in front of them bought nothing but friction.
+- **Generation is capped at three runs per visitor**, counted in Postgres
+  (`usage_counters`, [lib/usage.js](lib/usage.js)) against an `HttpOnly`
+  cookie holding an opaque UUID, with a per-IP-per-day backstop of ten so
+  that clearing the cookie in a loop does not mint unlimited allowances.
+  The cookie carries no count, so there is nothing in it worth forging.
+- **The enforcement point is an atomic conditional `UPDATE`**, not a
+  read-then-write and not a client-side counter, so two requests racing on
+  the last remaining search cannot both win, and `curl` is bound by exactly
+  the same row the browser is.
+- **`ADMIN_EMAILS` still exists**, now meaning one thing: exemption from
+  the meter, so the maintainer can test.
+- **`GENERATION_ENABLED` still outranks everything**, admin included, and
+  still fails closed. It remains the immediate off switch.
+- **A same-origin check was added to `POST /api/analyses`**, which matters
+  now that the route is public: without it, any third-party page could
+  spend its visitors' allowances and this deployment's budget on pageview.
+  A request with no `Origin` (curl) is allowed through to the meter, which
+  is the control that actually bounds it.
+
+What is *not* claimed: this is a cost brake, not identity. Someone
+determined can still cycle cookies across networks, and the honest bound on
+that is the per-IP daily cap plus the system-wide in-flight guard. The
+upgrade path, if it ever matters, is requiring an account to generate —
+the Better Auth setup already here — not fingerprinting.
+
+Finding 2 (open, unverified signup) stands as written, with its severity
+reduced rather than resolved: an account now confers *nothing* an anonymous
+visitor does not already have — the same three metered searches, the same
+free reads — unless its address is in `ADMIN_EMAILS`. A signup still costs
+a permanent row in Neon.
+
+The live posture is unchanged in one important respect: Vercel still has no
+`claude` CLI, so generation in production answers `503 no-claude` before
+any billable work, whatever anyone's remaining allowance says.
+`tests/quota.test.js` asserts the whole matrix against the real route.

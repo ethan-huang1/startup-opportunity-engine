@@ -44,37 +44,13 @@ async function hasOverflow(page) {
   );
 }
 
-/**
- * The API is gated behind a session now. Sign up a throwaway account (or
- * sign in, if a previous run already created it) so the context's cookie
- * jar carries a session into every page made from it.
- */
-async function ensureSignedIn(context) {
-  const email = process.env.TEST_EMAIL || 'browser-tests@example.com';
-  const password = process.env.TEST_PASSWORD || 'browser-tests-password';
-  // Better Auth rejects a state-changing request with no Origin. A real
-  // browser always sends one; Playwright's API client does not.
-  const headers = { origin: BASE };
-  const signUp = await context.request.post(`${BASE}/api/auth/sign-up/email`, {
-    headers,
-    data: { email, password, name: 'Browser Tests' },
-  });
-  if (signUp.ok()) return;
-  const signIn = await context.request.post(`${BASE}/api/auth/sign-in/email`, {
-    headers,
-    data: { email, password },
-  });
-  if (!signIn.ok()) {
-    throw new Error(`Could not authenticate the test session: ${signIn.status()} ${await signIn.text()}`);
-  }
-}
-
 async function main() {
   await mkdir(SHOTS, { recursive: true });
 
   const browser = await chromium.launch();
+  // No sign-in step: a fresh context is exactly a first-time visitor with
+  // the public link, which is the state the whole suite should run in.
   const context = await browser.newContext();
-  await ensureSignedIn(context);
 
   // Without a fixture the suite would sit waiting for `.opportunity` until it
   // timed out, which reads like a hang rather than a missing prerequisite.
@@ -91,12 +67,17 @@ async function main() {
 
   const report = await fixtureResponse.json();
 
-  // The browser suite runs as an ordinary signed-up account, which is the
-  // state most visitors are in: it must be able to read everything below
-  // and must not be offered generation controls.
+  // The suite runs as an anonymous visitor. Whether generation controls
+  // should appear depends on the deployment's kill switch and on how many
+  // free searches this brand-new visitor has, so the checks below compare
+  // the UI against what the server says rather than hard-coding either.
   const capabilities = await (await context.request.get(`${BASE}/api/session`)).json();
-  check('a normal account is not an admin', capabilities.isAdmin === false,
+  check('an anonymous visitor is not an admin', capabilities.isAdmin === false,
     `isAdmin=${capabilities.isAdmin}`);
+  check('an anonymous visitor reaches the app at all', capabilities.quota !== undefined,
+    JSON.stringify(capabilities));
+  const shouldOfferGeneration =
+    capabilities.generation?.available && capabilities.quota?.remaining > 0;
 
   // ---------- adequate-coverage run, desktop ----------
   const page = await context.newPage();
@@ -244,7 +225,21 @@ async function main() {
   check('a report says when it was analyzed', /Analyzed/.test(freshness || ''), freshness?.trim());
 
   const refreshOffered = await page.locator('#refresh-analysis').count();
-  check('no generation control is offered to a normal account', refreshOffered === 0);
+  check(
+    'the refresh control matches what the server would allow',
+    (refreshOffered > 0) === Boolean(shouldOfferGeneration),
+    `offered=${refreshOffered > 0}, allowed=${Boolean(shouldOfferGeneration)}`,
+  );
+
+  // The number a visitor needs before they spend anything. A fresh context
+  // is a brand-new visitor, so it must read as the full allowance.
+  const quotaNote = (await page.locator('#quota-note').textContent().catch(() => '')) || '';
+  check(
+    'the remaining-search count is stated, and matches the server',
+    new RegExp(`${capabilities.quota.remaining} of ${capabilities.quota.limit} searches remaining`)
+      .test(quotaNote),
+    quotaNote.trim(),
+  );
 
   // A market with no report must say so, and must not offer a run.
   const missing = await context.newPage();
@@ -252,8 +247,8 @@ async function main() {
   const missingText = await missing.locator('#status').textContent().catch(() => '');
   check("a missing market says it hasn't been analyzed",
     /hasn't been analyzed yet/.test(missingText || ''), missingText?.trim().slice(0, 80));
-  check('a missing market offers no analyze button to a normal account',
-    (await missing.locator('#status button').count()) === 0);
+  check('the analyze button on a missing market matches what the server would allow',
+    ((await missing.locator('#status button').count()) > 0) === Boolean(shouldOfferGeneration));
   await missing.close();
 
   // ---------- keyboard access ----------

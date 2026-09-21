@@ -14,7 +14,8 @@
     <div class="shell">
       <div class="account-bar" id="account-bar" hidden>
         <span id="account-email"></span>
-        <button type="button" id="sign-out-button" class="link-button">Sign out</button>
+        <button type="button" id="sign-in-button-toggle" class="link-button" hidden>Sign in</button>
+        <button type="button" id="sign-out-button" class="link-button" hidden>Sign out</button>
       </div>
 
       <p class="eyebrow">Evidence first</p>
@@ -45,12 +46,15 @@
           Searches Reddit, Hacker News, and GitHub issues from the last 30 days.
           A run takes 1–3 minutes.
         </p>
+
+        <!-- The one number a visitor needs before they spend anything.
+             Filled from GET /api/session, never counted in the browser. -->
+        <p id="quota-note" class="search-hint" aria-live="polite" hidden></p>
       </div>
 
       <p id="auth-pitch" class="search-hint" hidden>
-        Create a free account to browse the analyses already saved here.
-        Opening one is instant and calls no model — the research is done
-        once and kept.
+        Signing in is only for the maintainer. Browsing saved analyses and
+        running a new one both work without an account.
       </p>
 
       <form id="auth-form" class="auth-form" hidden>

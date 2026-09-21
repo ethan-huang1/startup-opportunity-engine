@@ -17,11 +17,18 @@ import { toNodeHandler, fromNodeHeaders } from 'better-auth/node';
 import { beginRun, failRun, saveRunResult, getReport, listMarkets, anyRunInProgress } from './lib/store.js';
 import {
   isAdminEmail,
-  isAdminRoute,
   checkRateLimit,
   generationAvailability,
   GENERATION_UNAVAILABLE_MESSAGE,
 } from './lib/access.js';
+import {
+  FREE_SEARCH_LIMIT,
+  visitorFrom,
+  networkKey,
+  getUsage,
+  consumeSearch,
+  refundSearch,
+} from './lib/usage.js';
 import { isClaudeAvailable } from './lib/claude.js';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
@@ -77,6 +84,19 @@ function sendJson(response, status, payload) {
   response.end(body);
 }
 
+/**
+ * Whether an Origin header names this same deployment. Anything that will
+ * not even parse — an opaque `null` origin from a sandboxed frame, junk —
+ * is not this origin, so it fails closed rather than throwing.
+ */
+function isSameOrigin(origin, host) {
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
 async function readJsonBody(request) {
   const chunks = [];
   for await (const chunk of request) chunks.push(chunk);
@@ -88,7 +108,7 @@ async function readJsonBody(request) {
  * Streams a live run. Each pipeline stage emits an event the UI renders.
  * `runId` is the row beginRun() already created — this only fills it in.
  */
-async function streamRun(market, slug, runId, request, response) {
+async function streamRun(market, slug, runId, request, response, { isAdmin = false } = {}) {
   response.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
     'Cache-Control': 'no-cache',
@@ -137,10 +157,15 @@ async function streamRun(market, slug, runId, request, response) {
   } catch (error) {
     console.error(`[run failed] ${market}:`, error);
     await failRun(runId, error.message);
-    // Only an admin can reach this, and the detail is genuinely useful to
-    // them mid-run — but a raw exception string can carry a path or a
-    // connection string, so the full object stays in the server log.
-    send('failed', { message: `The analysis stopped: ${error.message}` });
+    // The exception string is genuinely useful to the maintainer mid-run,
+    // and it can also carry a filesystem path or a connection string — so
+    // only an admin sees it. This route is public now; a visitor gets the
+    // fact that the run stopped, and the full object stays in the log.
+    send('failed', {
+      message: isAdmin
+        ? `The analysis stopped: ${error.message}`
+        : 'The analysis stopped before it finished. Nothing was saved.',
+    });
   } finally {
     clearInterval(heartbeat);
     if (!response.writableEnded) response.end();
@@ -161,31 +186,45 @@ async function route(request, response) {
     return;
   }
 
-  // Every other API route needs a signed-in user; the page itself and its
-  // static assets stay reachable so the login form can render.
+  // Everything below this line is reachable without signing in. Reading
+  // saved research is the product and costs nothing to serve; making people
+  // create an account to look at it only stopped them looking.
+  //
+  // A session is therefore optional and can only *add* privileges: an
+  // address in ADMIN_EMAILS generates without a quota. Anonymous is the
+  // normal case, not an error.
   let session = null;
   if (url.pathname.startsWith('/api/')) {
     session = await auth.api.getSession({ headers: fromNodeHeaders(request.headers) });
-    if (!session) {
-      sendJson(response, 401, { error: 'Sign in required.' });
-      return;
-    }
-
-    // Only generation is admin-only (SECURITY_AUDIT.md, Finding 1). Reading
-    // saved analyses is the product and is open to any signed-in account;
-    // writing one spends real money and is not.
-    if (isAdminRoute(url.pathname) && !isAdminEmail(session.user.email)) {
-      sendJson(response, 403, { error: 'Admin access required.' });
-      return;
-    }
   }
+  const isAdmin = isAdminEmail(session?.user?.email);
+
+  // Minted on the first response of any kind, the page included, so the
+  // free-search allowance is attached to a browser rather than to nothing.
+  // Deliberately after the Better Auth branch above: those routes manage
+  // their own cookies and have no business carrying this one.
+  const visitorId = visitorFrom(request, response);
 
   // POST because this creates state and spends real LLM calls — unlike every
   // other route here, it is not safe to repeat or to trigger from a plain
-  // link. Also the one route for an explicit refresh: a market that's
+  // link. It is also the only route that is metered (see lib/usage.js). Also the one route for an explicit refresh: a market that's
   // already analyzed just calls this again, and the read routes below never
   // see the new run until it finishes (see lib/store.js's getReport).
   if (request.method === 'POST' && url.pathname === '/api/analyses') {
+    // This route used to be reachable only by a signed-in admin, so a
+    // cross-site POST could not do anything. It is public now, which makes
+    // it worth something to a third-party page: one that quietly POSTs
+    // here on every pageview burns its visitors' allowances and this
+    // deployment's budget. A browser always sends Origin on a cross-site
+    // POST, so refusing a foreign one closes that off. A *missing* Origin
+    // is left alone on purpose — that is curl, which the meter below is
+    // there to handle, not this check.
+    const origin = request.headers.origin;
+    if (origin && !isSameOrigin(origin, request.headers.host)) {
+      sendJson(response, 403, { error: 'Cross-origin generation requests are not accepted.' });
+      return;
+    }
+
     // Fail-closed kill switch: checked before anything that scrapes or makes
     // an outbound request, not just before the LLM call. Applies in every
     // environment, production included — see generationAvailability().
@@ -211,7 +250,24 @@ async function route(request, response) {
       });
       return;
     }
-    if (!checkRateLimit(session.user.email)) {
+    // A cheap read-only look at the meter, so a visitor with nothing left
+    // is told so immediately rather than after four more checks. This is
+    // not the enforcement point — consumeSearch() below is, because only
+    // an atomic conditional UPDATE is safe against two requests racing on
+    // the last remaining search. A read here could be stale; that is fine,
+    // it can only ever refuse early.
+    if (!isAdmin && (await getUsage(visitorId)).remaining <= 0) {
+      sendJson(response, 429, {
+        error: `You've used your ${FREE_SEARCH_LIMIT} free searches.`,
+        reason: 'quota',
+      });
+      return;
+    }
+
+    // Keyed by network for anonymous visitors, not by the visitor cookie:
+    // the cookie is client-chosen, so keying on it would let one caller
+    // mint a fresh bucket per request — and grow this Map without bound.
+    if (!checkRateLimit(session?.user?.email || networkKey(request))) {
       sendJson(response, 429, { error: 'Too many analysis requests — try again in a minute.' });
       return;
     }
@@ -234,29 +290,55 @@ async function route(request, response) {
       return;
     }
 
+    // The allowance is actually spent here and nowhere earlier: every
+    // refusal above is free, so a bad query, a flipped kill switch or a
+    // busy server never costs a visitor one of their three. The count is
+    // an atomic conditional UPDATE in Postgres (lib/usage.js), so this is
+    // also what a direct curl against this route runs into — there is no
+    // client-side counter anywhere in the decision.
+    if (!isAdmin) {
+      const spent = await consumeSearch(visitorId, request);
+      if (!spent.ok) {
+        sendJson(response, 429, {
+          error:
+            spent.reason === 'quota'
+              ? `You've used your ${FREE_SEARCH_LIMIT} free searches.`
+              : 'This network has used its free searches for today — try again tomorrow.',
+          reason: spent.reason,
+        });
+        return;
+      }
+    }
+
     const slug = slugify(market);
     const claim = await beginRun(slug, market);
     if (claim.status === 'already_analyzing') {
+      // Nothing new started — someone else already owns this market — so
+      // the search that was just spent goes back.
+      if (!isAdmin) await refundSearch(visitorId, request);
       sendJson(response, 409, { error: 'already_analyzing', slug, runId: claim.runId });
       return;
     }
 
-    await streamRun(market, slug, claim.runId, request, response);
+    await streamRun(market, slug, claim.runId, request, response, { isAdmin });
     return;
   }
 
-  // What this account may do. The UI asks once at load and hides controls it
-  // cannot use, rather than offering a button that 403s or 503s.
+  // What this visitor may do. The UI asks at load and after every run, and
+  // hides controls it cannot use, rather than offering a button that 429s
+  // or 503s. Answering it is a pure read: asking never spends a search.
   if (url.pathname === '/api/session') {
     const availability = generationAvailability();
     sendJson(response, 200, {
-      email: session.user.email,
-      isAdmin: isAdminEmail(session.user.email),
+      email: session?.user?.email ?? null,
+      isAdmin,
       generation: {
         available: availability.available,
         reason: availability.reason,
         message: availability.reason ? GENERATION_UNAVAILABLE_MESSAGE[availability.reason] : null,
       },
+      // Admins are unmetered so the maintainer can actually test the thing.
+      quota: isAdmin ? { unlimited: true } : { unlimited: false, ...(await getUsage(visitorId)) },
     });
     return;
   }

@@ -41,21 +41,31 @@ const state = {
   weights: null,
   evidenceFilter: 'all',
   evidenceExpanded: false,
-  /** From GET /api/session: { email, isAdmin, generation: {...} }. */
+  /** From GET /api/session: { email, isAdmin, generation, quota }. */
   capabilities: null,
 };
 
 /**
- * Generation needs two things: an admin account, and the deployment's kill
- * switch on. The server enforces both; this only decides whether to show a
- * control, so nobody is offered a button that answers 403 or 503.
+ * Generation needs two things: the deployment's kill switch on, and either
+ * an admin account or an unspent free search. The server enforces both —
+ * this only decides whether to show a control, so nobody is offered a
+ * button that answers 429 or 503.
  *
- * Deliberately not conditioned on the environment. Whether generation works
- * here is a question about configuration, which /api/session answers — the
- * UI does not guess from the hostname.
+ * Deliberately not conditioned on the environment, and deliberately reading
+ * the server's count rather than keeping one. Whether generation works here
+ * is a question /api/session answers; the UI does not guess, and it has no
+ * number of its own that could disagree with Postgres.
  */
 function canGenerate() {
-  return Boolean(state.capabilities?.isAdmin && state.capabilities?.generation?.available);
+  const quota = state.capabilities?.quota;
+  if (!state.capabilities?.generation?.available) return false;
+  return Boolean(quota?.unlimited || quota?.remaining > 0);
+}
+
+/** The exact sentence for a visitor who has spent all three. */
+function quotaExhaustedMessage() {
+  const limit = state.capabilities?.quota?.limit ?? 3;
+  return `You've used your ${limit} free searches.`;
 }
 
 const $ = (id) => document.getElementById(id);
@@ -842,11 +852,24 @@ async function consumeSSE(response, handlers) {
   }
 }
 
+/**
+ * One guard for every caller, rather than one per button. Three different
+ * controls reach runResearch() — the search box's "Analyze this market",
+ * the report bar's "Refresh analysis", and the not-analyzed prompt — and
+ * only the first of them disabled itself. Double-clicking Refresh used to
+ * fire two billable POSTs.
+ */
+let runInFlight = false;
+
 function runResearch(market) {
+  if (runInFlight) return;
+  runInFlight = true;
+
   const button = $('run-button');
   const errorBox = $('error');
   const events = [];
 
+  $('refresh-analysis')?.setAttribute('disabled', '');
   button.disabled = true;
   button.textContent = 'Researching…';
   errorBox.hidden = true;
@@ -855,9 +878,13 @@ function runResearch(market) {
   startElapsedClock();
 
   const finish = () => {
+    runInFlight = false;
     stopElapsedClock();
     button.disabled = false;
     button.textContent = 'Research';
+    // Whatever happened, the server's count is the truth about what is
+    // left — including the refund when this lost the race for a market.
+    refreshCapabilities();
   };
 
   fetch('/api/analyses', {
@@ -910,8 +937,7 @@ function runResearch(market) {
  * Returns null for 404, meaning "genuinely not analyzed".
  */
 function describeReadFailure(status) {
-  if (status === 401) return 'Your session has expired. Sign in again to keep reading reports.';
-  if (status === 403) return 'This account is not allowed to open that report.';
+  if (status === 401 || status === 403) return 'The server refused that report.';
   if (status === 404) return null;
   if (status >= 500) {
     return 'The report database could not be reached. That is a problem on our side, ' +
@@ -950,14 +976,13 @@ function showNotAnalyzed(market) {
     return;
   }
 
-  // Why they cannot generate depends on which of the two conditions failed,
-  // and the honest answer differs: an admin is looking at a switch that is
-  // off, an ordinary account at a permission it does not have. Neither may
-  // claim this deployment only serves saved reports — with the switch on,
-  // that is no longer true of production either.
-  const note = state.capabilities?.isAdmin
-    ? state.capabilities?.generation?.message
-    : 'New analyses are added by the maintainer.';
+  // Why they cannot generate depends on which condition failed, and the
+  // honest answer differs: a spent allowance is not the same fact as a
+  // deployment that has generation switched off. Neither may claim this
+  // deployment only serves saved reports when the switch is on.
+  const note = state.capabilities?.generation?.available
+    ? quotaExhaustedMessage()
+    : state.capabilities?.generation?.message;
 
   status.appendChild(el('p', {
     class: 'control-note',
@@ -1070,32 +1095,45 @@ $('reset-weights').addEventListener('click', () => {
   renderOpportunities();
 });
 
-/** null when signed out — /get-session returns 200 with a null body, not 401. */
-async function getSession() {
-  const response = await fetch('/api/auth/get-session');
-  return (await response.json().catch(() => null)) || null;
-}
-
-function showApp(session) {
-  $('auth-form').hidden = true;
-  $('auth-pitch').hidden = true;
-  $('search-panel').hidden = false;
-  $('main').hidden = false;
+/**
+ * The account strip. Signing in is optional now — it exists so the
+ * maintainer can reach an unmetered account — so the signed-out state is
+ * an offer, not a wall.
+ */
+function renderAccountBar(email) {
   $('account-bar').hidden = false;
-  $('account-email').textContent = session.user.email;
+  $('account-email').textContent = email || '';
+  $('sign-out-button').hidden = !email;
+  $('sign-in-button-toggle').hidden = Boolean(email);
+  if (email) {
+    $('auth-form').hidden = true;
+    $('auth-pitch').hidden = true;
+  }
 }
 
-function showAuthForm() {
-  $('auth-form').hidden = false;
-  $('auth-pitch').hidden = false;
-  $('search-panel').hidden = true;
-  $('main').hidden = true;
-  $('account-bar').hidden = true;
-  $('explore').hidden = true;
-  $('report-meta').hidden = true;
-  state.capabilities = null;
-  $('auth-form').reset();
-  setAuthMode('signin');
+/**
+ * "2 of 3 searches remaining." — the server's count, restated. When it hits
+ * zero this is the only place that has to say so, because canGenerate()
+ * has already taken every generate control away.
+ */
+function renderQuota() {
+  const note = $('quota-note');
+  const quota = state.capabilities?.quota;
+
+  if (!quota || quota.unlimited) {
+    note.hidden = true;
+    return;
+  }
+
+  note.hidden = false;
+  note.textContent =
+    quota.remaining > 0
+      ? `${quota.remaining} of ${quota.limit} searches remaining.`
+      : `${quotaExhaustedMessage()} You can still open and explore every saved analysis below.`;
+  note.classList.toggle('spent', quota.remaining === 0);
+  // The search box itself stays enabled at zero: typing a market that has
+  // already been analysed is a free read, and that is most of the product.
+  // Only the generate controls disappear, via canGenerate().
 }
 
 async function submitAuth(path, body) {
@@ -1111,7 +1149,8 @@ async function submitAuth(path, body) {
       const payload = await response.json().catch(() => ({}));
       throw new Error(payload.message || 'That did not work — check your details.');
     }
-    await startSignedIn(await getSession());
+    $('auth-form').hidden = true;
+    await refreshCapabilities();
   } catch (error) {
     errorBox.textContent = error.message;
     errorBox.hidden = false;
@@ -1145,30 +1184,43 @@ $('sign-up-button').addEventListener('click', () => {
   setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
 });
 
+$('sign-in-button-toggle').addEventListener('click', () => {
+  const form = $('auth-form');
+  form.hidden = !form.hidden;
+  $('auth-pitch').hidden = form.hidden;
+  setAuthMode('signin');
+});
+
 $('sign-out-button').addEventListener('click', async () => {
   await fetch('/api/auth/sign-out', { method: 'POST' });
-  showAuthForm();
+  await refreshCapabilities();
 });
 
 /**
- * Everything that has to happen once a session exists: find out what this
- * account may do (so controls match reality), list what is already in the
- * database, and open a deep-linked report if there is one.
+ * Re-asks the server what this visitor may do. Called at load and after
+ * every generation attempt, which is what keeps the remaining-searches
+ * line honest without the browser ever doing the arithmetic: the number on
+ * screen is always one Postgres read old, not a local guess that could
+ * drift from the count the route actually enforces.
  */
-async function startSignedIn(session) {
-  showApp(session);
+async function refreshCapabilities() {
   state.capabilities = await fetch('/api/session')
     .then((response) => (response.ok ? response.json() : null))
     .catch(() => null);
-
-  const deepLink = new URLSearchParams(location.search).get('run');
-  if (deepLink) await loadCachedRun(deepLink);
-  await renderExistingAnalyses();
+  renderAccountBar(state.capabilities?.email);
+  renderQuota();
+  if (state.report) renderReportMeta(state.report);
 }
 
-const session = await getSession();
-if (session) {
-  await startSignedIn(session);
-} else {
-  showAuthForm();
-}
+/**
+ * No sign-in required: the app opens straight into the product. Find out
+ * what this visitor may do (so controls match reality), list what is
+ * already in the database, and open a deep-linked report if there is one.
+ */
+$('main').hidden = false;
+$('search-panel').hidden = false;
+await refreshCapabilities();
+
+const deepLink = new URLSearchParams(location.search).get('run');
+if (deepLink) await loadCachedRun(deepLink);
+await renderExistingAnalyses();
