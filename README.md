@@ -21,7 +21,12 @@ subprocess and there is no CLI in a serverless runtime. New markets appear
 when I run the pipeline on my laptop against the same database. See
 [Limitations](#limitations).
 
-![The landing page, with saved analyses you can open instantly](docs/landing.png)
+![The live site: a search box, the source-bias disclosure, and the saved analyses anyone can open](docs/landing.png)
+
+Both screenshots on this page are from the live deployment. Searching a market
+that has already been analyzed opens it instantly. Searching one that has not
+tells you so and points you at the saved list, since the public site does not
+generate.
 
 ## What a result looks like
 
