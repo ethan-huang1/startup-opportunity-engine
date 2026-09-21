@@ -1,6 +1,11 @@
 # Security & Cost-Abuse Audit — startup-opportunity-engine on Vercel
 
-Audited: live deployment at `https://startup-opportunity-engine.vercel.app`, commit `c7b066c` (the code actually deployed — see **Note on uncommitted local changes** at the bottom; a separate, undeployed body of work exists in the working tree and was *not* the audit target, but is relevant to remediation).
+> **Status: every finding below has been addressed.** This document is kept as
+> a record of what was wrong and what was done about it. Read the
+> **Resolution** section and the **Amendment** at the bottom for the current
+> posture. Do not read the findings as a description of the app today.
+
+Audited: live deployment at `https://startup-opportunity-engine.vercel.app`, at the "Deploy to Vercel" commit (the code actually deployed — see **Note on uncommitted local changes** at the bottom; a separate, undeployed body of work exists in the working tree and was *not* the audit target, but is relevant to remediation).
 
 Method: read every server-reachable code path with line citations below, then verified each claim against the live deployment (curl + `vercel logs`), not just by reading code. Nothing was modified or deployed.
 
