@@ -5,3 +5,7 @@ node_modules/
 .DS_Store
 verification/
 .vercel
+
+# local scratch: pasted terminal banners and exported session transcripts
+startup-opportunity-engine-checkpoint.txt
+*-claude-code-session.md
